@@ -42,3 +42,34 @@ f = {
 f.value("lol") //Boolean result (true / false)
 f.value("tacocat")
 f.value("dog")
+
+//ADVANCED: Symmetric difference algorithm. Create a function that compares two arrays of numbers and gives back an array with all numbers that are present inly in one of the arrays. For example, comparing [1, 2, 3, 4] and [2, 3, 4, 5], the result should be [1, 5].
+//(My approach + other solutions in the additional document): comparing each element of the first array: asking the second array how many instances are in there of each element of the first array (if no instances, it passes to the final array) + same viceversa + concatenate both results at the end:
+(
+a = {
+	arg array1, array2;
+	var result1, result2, finalArray, addition, utmostArray;
+
+	//Comparing the array and obtaining the unique values of each:
+
+	result1 = array1.select({ //The method select receives a collection and features a function and two arguments (item and index). The method answers a collection consisting of all items in the receiver for which its function answers "true".
+		arg item;
+		array2.occurrencesOf(item) == 0 //OccurrencesOf(item) refers to the number of repetitions of the given item within a collection.
+	});
+
+	result2 = array2.select({
+		arg item;
+		array1.occurrencesOf(item) == 0
+	});
+
+	finalArray = result1 ++ result2;
+	finalArray.postln;
+
+	//Filtering repetitions:
+
+	finalArray = finalArray.as(Set); //See theory about Set (there is a method which performs this function directly between Sets).
+	finalArray = finalArray.as(Array)
+}
+)
+
+a.value([1, 2, 3, 3, 6, 7, 7], [5, 2, 1, 4, 6, 8, 1]) //--> The solution should be [7, 8, 4, 5, 3] (the order is not too important here).
