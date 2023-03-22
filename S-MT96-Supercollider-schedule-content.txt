@@ -1,0 +1,84 @@
+Supercollider S-MT96 May 2023
+
+************************************************************************************
+
+Schedule
+May 15-20 (except 18) and 26th.
+15.05.2023 09.00 - 16.00	S1111 (15 people) 		  
+15.05.2023 17.00 - 19.00	S2116 (6 people) -- excercises, clinique  
+16.05.2023 09.00 - 16.00	S1111 (15 people)			  
+16.05.2023 17.00 - 19.00	S2116 (6 people)			  
+17.05.2023 09.00 - 16.00	S1111 (15 people)			  
+17.05.2023 17.00 - 19.00	S2116 (6 people)			  
+19.05.2023 09.00 - 16.00	S1111 (15 people)			  
+19.05.2023 17.00 - 19.00	S2116 (6 people)			  
+20.05.2023 09.00 - 16.00	S1111 (15 people)			  
+20.05.2023 17.00 - 19.00	S2116 (6 people)			  
+26.05.2023 14.00 - 16.00	S1111 (15 people)
+ 
+
+************************************************************************************
+
+Learning Outcomes
+
+After completion of this course a student should be:
+- familiar with the working flow on the software
+- understand the software architecture, the potentialities and challenges
+- able to write Ugen generators graphs for audio synthesis
+- able to manipulate the syntax to create algorithmic compositions
+- comfortable mapping and control synthesis parameters 
+- find information within the software and with other resources to develop individual projects
+
+
+
+************************************************************************************
+Content
+
+Session 1a: Introduction, Language and synthesis. OOP.
+•      Data Types numbers, literals, collections, functions, classes, mathematical operations (unary, binary)
+•      Writing functions
+ 
+Session 1b: Sound Synthesis Basics. Ugens, Unit Generators and Signals (Audio, Control, Demand, Initial) TWO GROUPS
+•      {}.play
+•      Generators, Oscillators Periodic Aperiodic, Filters
+•      Mixing, Modulating. Envelopes, Lines, Glissandi
+
+************************************************************************************
+Session 2a: Additive synthesis & Subtractive Synthesis, Frequency Modulation, Amplitude Modulation
+•      Bell sound and Percussion sounds
+ 
+Session 2b: Samples: 
+•      Buffers, samplers
+•      wavetables
+********************************************************************************************
+Session 3a: Making instruments and controlling Synthesis  (Synth, Object and messages)
+•      SynthDef
+•      Ndef
+arpegiators, triggers, counters
+
+Session 3b: Controllers 
+•      MIDI 
+•      OSC
+************************************************************************************
+Session 4a: Algorithmic composition
+Pilar examples and demos.
+
+Session 4b: Sequencing, Patterns
+•      Pbind
+•      Pdef
+•      Pseq, Prand
+ 
+************************************************************************************
+ Session 5a: FX and sound processing
+•      time: delays, granular, 
+•      amplitude: shaper, panning, ambisonics, multichannel panning 
+•      frequency: spectral FFTs
+ 
+Session 5b: Using supercollider inside a computer music environment
+
+************************************************************************************
+Session 6 - DEMO day. Personal Project Implementation
+- use the software
+- demostrate an implementation of a working code.
+- present the code with analysis.
+
