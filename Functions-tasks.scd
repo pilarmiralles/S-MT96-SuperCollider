@@ -2,8 +2,7 @@
 
 //Create a function that calculates the hypotenuse of a triangle applying the Pythagorean theorem:
 (
-{
-	arg sideA = 1, sideB = 1;
+{ |sideA = 1, sideB = 1|
 	var hypotenuse;
 
 	hypotenuse = (sideA.pow(2) + sideB.pow(2)).sqrt
@@ -13,8 +12,7 @@
 
 //Create a function in which the frequency in Hz and MIDI value of the overtone number (n) of a given fundamental frequency are calculated:
 (
-{
-	arg n, fundFrecMidi = 24;
+{ |n, fundFrecMidi = 24|
 	var hz, midi;
 
 	hz = n * fundFrecMidi.midicps;
@@ -27,16 +25,15 @@
 
 //Create a function that checks whether a word (string of letters) is a palindrome or not:
 (
-f = {
-		arg word;
-		var original, reverse;
+f = { |word|
+	var original, reverse;
 
-		original = word;
+	original = word;
 
-		reverse = word.reverse;
+	reverse = word.reverse;
 
 	original == reverse;
-	}
+}
 )
 
 f.value("lol") //Boolean result (true / false)
@@ -46,8 +43,7 @@ f.value("dog")
 //ADVANCED: Symmetric difference algorithm. Create a function that compares two arrays of numbers and gives back an array with all numbers that are present inly in one of the arrays. For example, comparing [1, 2, 3, 4] and [2, 3, 4, 5], the result should be [1, 5].
 //(My approach + other solutions in the additional document): comparing each element of the first array: asking the second array how many instances are in there of each element of the first array (if no instances, it passes to the final array) + same viceversa + concatenate both results at the end:
 (
-a = {
-	arg array1, array2;
+a = { |array1, array2|
 	var result1, result2, finalArray, addition, utmostArray;
 
 	//Comparing the array and obtaining the unique values of each:

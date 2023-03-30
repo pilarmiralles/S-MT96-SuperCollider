@@ -31,8 +31,8 @@
 	Mix(
 		Ringz.ar(
 			Dust.ar(3),
-			Array.fill(60, {exprand(50, 3000)}),
-			Array.fill(60, {exprand(0.5, 5)}),
+			Array.fill(60, { exprand(50, 3000) }),
+			Array.fill(60, { exprand(0.5, 5) }),
 			0.01
 		)
 	)
@@ -42,16 +42,15 @@
 //From the former code: add an independent stereo panoramization for each filter and carry out a slow modulation of the position of each filter using a linear low frequency noise generator. Then mix the 60 signals into a two-channel signal:
 (
 {
-
 	Mix(
 		Pan2.ar( //Pan2 already provokes a two-channel signal for each filter, so Mix will consist on an array of 60 two-channel signals).
 			Ringz.ar(
 				Dust.ar(3),
-				Array.fill(60, {exprand(50, 3000)}),
-				Array.fill(60, {exprand(0.5, 5)}),
+				Array.fill(60, { exprand(50, 3000) }),
+				Array.fill(60, { exprand(0.5, 5) }),
 				0.01
 			),
-			Array.fill(60, {LFDNoise1.ar(1/5, 1)})
+			Array.fill(60, { LFDNoise1.ar(1/5, 1) })
 		)
 	)
 }.play
@@ -61,10 +60,9 @@
 
 //Given code:
 (
-{
-	var freqVariation, signal, freqs;
+{ var freqVariation, signal, freqs;
 
-	freqVariation = SinOsc.ar(0.125, [ 0, 1pi ], 0.5, 1);
+	freqVariation = SinOsc.ar(0.125, [0, 1pi], 0.5, 1);
 
 	freqs = Array.geom(6, 100, 7/4) * freqVariation;
 
@@ -73,7 +71,7 @@
 			BrownNoise.ar,
 			freqs,
 			0.05/freqs,
-			[ 18, 24, 30 ].dbamp
+			[18, 24, 30].dbamp
 		)
 	)
 }.play
@@ -81,8 +79,7 @@
 
 //Possible solution:
 (
-{
-	var freqVariation, freqs, noise, amps, rq, signal;
+{ var freqVariation, freqs, noise, amps, rq, signal;
 
 	freqVariation = [SinOsc.ar(0.125, 0, 0.5, 1),
 		SinOsc.ar(0.125, 1pi, 0.5, 1)];
@@ -91,7 +88,7 @@
 
 	noise = BrownNoise.ar;
 
-	amps = [ 18, 24, 30 ].dbamp;
+	amps = [18, 24, 30].dbamp;
 
 	rq = 0.05;
 

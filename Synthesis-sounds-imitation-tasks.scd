@@ -2,12 +2,11 @@
 
 //1 - Some sort of hammer on a piece of metal? (a very soft digging in the mine with a pickaxe):
 (
-{
-	var impulse;
+{ var impulse;
 
 	impulse = Impulse.ar(0.5); //One impulse every two seconds: when used in Ringz, the impulse acts as input signal / when used in Decay, the impulse works as a trigger of the "envelope".
 
-	{Mix(
+	{ Mix(
 		Ringz.ar(
 			impulse,
 			[60, 3000, 3070, 6550], //Original [52, 7000, 14550], maybe closer to a coin sound.
@@ -33,7 +32,7 @@
 			1,
 			[0.002, 0.012, 0.018, 0.013, 0.002, 0.012, 0.018, 0.013]
 		],
-		{Dust.ar(3, 0.1)} !2 //Using Dust: tapping sound, quite realistic.
+		{ Dust.ar(3, 0.1) } !2 //Using Dust: tapping sound, quite realistic.
 )}.play
 )
 
@@ -45,14 +44,13 @@
             1,
             [0.002, 0.012, 0.018, 0.013, 0.002, 0.012, 0.018, 0.013] * 12 //The product in here works as a lag for each decay time.
         ],
-        {Dust.ar(3, 0.1)} !2
+        { Dust.ar(3, 0.1) } !2
 )}.play
 )
 
 //3 - Two ballons rubbed against each other:
 (
-{
-	var signal, resonators, freqs;
+{ var signal, resonators, freqs;
 
 	freqs = Array.fill(10, { exprand(100, 200) }); //Array of 10 random frequencies from 100 to 200 Hz.
 	signal = Saw.ar(LFDNoise3.ar(10, 30, 70).poll(5), LFDNoise3.ar(10).max(0)); //A Sawtooth wave with a frequency modulation and an amplitude modulation which is sent out only when above 0 (using .max).
@@ -66,13 +64,12 @@
 
 //4 - Radio interferences:
 (
-{
-	var trigger, signal, env, finalSignal, masterVolume = 0.3;
+{ var trigger, signal, env, finalSignal, masterVolume = 0.3;
 
-	trigger = Dust.ar(Array.fill(20, {rrand(3, 7)}));
+	trigger = Dust.ar(Array.fill(20, { rrand(3, 7) }));
 
 	signal = LFPulse.ar(
-		Array.fill(20, {exprand(90, 300)}), //Lower freqs version, for instance 70-130 Hz.
+		Array.fill(20, { exprand(90, 300) }), //Lower freqs version, for instance 70-130 Hz.
 		0,
 		LFDNoise0.ar(600, 0.3, 0.5),
 		0.1 !2
@@ -80,7 +77,7 @@
 
 	env = EnvGen.ar(Env.perc(0.05, 0.05, 0.3), trigger);
 
-	finalSignal = {Mix(signal * env)} !2;
+	finalSignal = { Mix(signal * env) } !2;
 
 	finalSignal * masterVolume;
 
@@ -99,11 +96,11 @@
 			0.4,
 			Array.fill(8, { exprand(0.002, 0.02)}) * 20],
 
-		{Pulse.ar(
+		{ Pulse.ar(
 			80,
 			PinkNoise.ar(0.1),
 			0.1
-		)} !2
+		) } !2
 		),
 		1,
 		1
@@ -118,15 +115,16 @@
 (
 { var signal;
 
-	signal = {Klank.ar(
+	signal = { Klank.ar(
 		`[
 			[117, 223, 257, 464, 727, 1002],
 			[0.04, 0.08, 0.07, 0.08, 0.1, 0.07],
-			Array.fill(6, {exprand (0.1, 0.8) * 16})
+			Array.fill(6, { exprand (0.1, 0.8) * 16 })
 		],
 
 		LPF.ar(Dust.ar(3, 0.5), 300)
-	)}!2;
+	)
+	}!2;
 
 	signal * 2
 
@@ -137,13 +135,13 @@
 (
 { var signal;
 
-	signal = {Mix.ar(
+	signal = { Mix.ar(
 		Pulse.ar(
-			Array.fill(6, { exprand (60, 100)}),
+			Array.fill(6, { exprand (60, 100) }),
 			LFDNoise1.ar(800, 0.3, 0.5).lag(0.001),
 			0.025
 		)
-	)} !2;
+	) } !2;
 
 	FreeVerb.ar(signal, 0.5, 0.7) //Not clear whether the reverb helps.
 
@@ -152,8 +150,7 @@
 
 //8 - Organ synthesizer (cheap Bach XD):
 (
-{
-	var freqEnv, durEnv, freqs, amps, trigger = 1, signal, envPerc;
+{ var freqEnv, durEnv, freqs, amps, trigger = 1, signal, envPerc;
 
 	freqEnv = EnvGen.ar(Env([33, 33, 31, 33, 31, 29, 28, 26, 25, 26], [0.125, 0.125, 2.2, 0.125, 0.125, 0.125, 0.125, 1, 2], \step).circle);
 	durEnv = EnvGen.ar(Env([0.125, 0.125, 0.125, 2.2, 0.125, 0.125, 0.125, 0.125, 1, 2], [0.125, 0.125, 2.2, 0.125, 0.125, 0.125, 0.125, 1, 2], \step).circle);
@@ -177,4 +174,3 @@
 
 }.play
 )
-

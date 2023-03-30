@@ -2,7 +2,7 @@
 Combine the use of patterns within a Routine (patterns generate values / Routine asks for values to patterns and creaters synths) following these instructions:
 - Use the following SynthDef \sinePerc.
 - Use the following array of MIDI notes: [ 7, 7, 9, 7, 9, 11, 9, 7, 6, 4, 2 ] + 72.
-- Use the following array of durations: [ 1, 1, 1/8, 1/8, 1/2, 1/4, 1/2, 1/4, 1/4, 1/2, 1.5 ].
+- Use the following array of durations: [1, 1, 1/8, 1/8, 1/2, 1/4, 1/2, 1/4, 1/4, 1/2, 1.5]
 - (The combination of notes and durations sounds like the theme of Bach's Goldberg Variations).
 - ALGORITHMIC TASK: Each repetition of the complete melody should be played at a different tempo: for this mulriply all durations by a random value.
 */
@@ -11,8 +11,7 @@ Combine the use of patterns within a Routine (patterns generate values / Routine
 (
 SynthDef(
 	\sinePerc,
-	{
-		arg freq, amp = 0.1, durEnv = 1, pan = 0;
+	{ |freq, amp = 0.1, durEnv = 1, pan = 0|
 		var signal, env;
 
 		signal = SinOsc.ar(freq, 0, amp);
@@ -33,20 +32,20 @@ SynthDef(
 (
 var pitches, durations;
 
-pitches = Pseq([ 7, 7, 9, 7, 9, 11, 9, 7, 6, 4, 2 ] + 72, inf).asStream;
+pitches = Pseq([7, 7, 9, 7, 9, 11, 9, 7, 6, 4, 2] + 72, inf).asStream;
 
-durations = Pseq([ 1, 1, 1/8, 1/8, 1/2, 1/4, 1/2, 1/4, 1/4, 1/2, 1.5 ], inf).asStream;
+durations = Pseq([1, 1, 1/8, 1/8, 1/2, 1/4, 1/2, 1/4, 1/4, 1/2, 1.5], inf).asStream;
 
 Routine({ var nextDur, newTempo = 1; //I need a default value because of the i != 0 condition.
 
-	inf.do({ arg i;
+	inf.do({ |i|;
 
-		if ((i % 11 == 0).and(i != 0), {newTempo = rrand(0.5, 2.5)}); //First melody at original "tempo". The use of the module is the key of this exercise to choose a new tempo product every 11 pitches (complete melody cycle).
+		if ((i % 11 == 0).and(i != 0), { newTempo = rrand(0.5, 2.5) }); //First melody at original "tempo". The use of the module is the key of this exercise to choose a new tempo product every 11 pitches (complete melody cycle).
 
 		nextDur = durations.next * newTempo; //The tempo product is also applied to durEnv so that the length of the sound is adapted (alongside the wait time of the routine).
 
 		Synth(\sinePerc,
-			[\freq, pitches.next.postln.midicps, \durEnv, nextDur ]
+			[\freq, pitches.next.postln.midicps, \durEnv, nextDur]
 		);
 		nextDur.postln.wait
 	})
