@@ -1016,6 +1016,10 @@ case
 { "error" }
 )
 
+//"Select" method:
+[1, 2, 3, 4].select({ |item, i| item.even });
+
+
 //PATTERNS
 //Basic SynthDef:
 (

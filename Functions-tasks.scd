@@ -40,6 +40,22 @@ f.value("lol") //Boolean result (true / false)
 f.value("tacocat")
 f.value("dog")
 
+//Given an array of integers, create a function that returns the array from the middle value to the last element (if there are two middle values, take the second. For this last step, a conditional is needed. Skip if no knowledge yet):
+(
+f = { |array = [1, 2, 3, 4, 5]|
+	var size, middle;
+
+	size = array.size;
+
+	if (size.odd, {middle = (size / 2).roundUp - 1}, {middle = size / 2}); //The result of this is an INDEX.
+
+	array[middle.asInt..]
+
+}
+)
+
+f.value([1, 2, 3, 4, 5, 6, 7])
+
 //ADVANCED: Symmetric difference algorithm. Create a function that compares two arrays of numbers and gives back an array with all numbers that are present inly in one of the arrays. For example, comparing [1, 2, 3, 4] and [2, 3, 4, 5], the result should be [1, 5].
 //(My approach + other solutions in the additional document): comparing each element of the first array: asking the second array how many instances are in there of each element of the first array (if no instances, it passes to the final array) + same viceversa + concatenate both results at the end:
 (
