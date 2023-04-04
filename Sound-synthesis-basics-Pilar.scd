@@ -1265,6 +1265,14 @@ ring4: //(a * a * b) - (a * b * b)
 
 { SinOsc.ar(7000, 0, 0.2) ring4: SinOsc.ar(LFDNoise3.ar(3, 125, 7000), 0, 0.3 !2) }.play
 
+//Frequency modulation (FM):
+{ SinOsc.ar(500 + SinOsc.ar(1) * 0.2 !2 }.scope
+{ SinOsc.ar(500 + SinOsc.ar(1, 0, 20)) * 0.2 !2 }.scope
+{ SinOsc.ar(500 + SinOsc.ar(8, 0, 400)) * 0.2 !2 }.scope
+{ SinOsc.ar(500 + SinOsc.ar(22, 0, 400)) * 0.2 !2 }.scope //Audio rate limit.
+{ SinOsc.ar(500 + SinOsc.ar(80, 0, 400)) * 0.2 !2 }.scope
+
+{ SinOsc.ar(MouseY.kr(500, 5000, 1).poll + SinOsc.ar(MouseX.kr(1, 2000, 1).poll, mul: LFNoise0.kr(8).range(400, 4500))) * 0.1 !2 }.scope
 
 //Decay lines:
 { BrownNoise.ar !2 * Decay.ar(Impulse.ar(0.5), 1, 0.2) }.play
