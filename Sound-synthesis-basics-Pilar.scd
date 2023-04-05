@@ -14,7 +14,7 @@
 (-1, -0.8..1)
 (0, 0.2..1)
 
-(0.1 ! 10).sum == 1.0 //"False".
+(0.1 !10).sum == 1.0 //"False".
 (0.1 + 0.1 + 0.1 + 0.1 + 0.1 + 0.1 + 0.1 + 0.1 + 0.1 + 0.1) //But equal to 1.0 in fact.
 
 //Other floats:
@@ -71,7 +71,7 @@ HPF
 7.pow(1/12) //Calculating the "x" root of a number using its power equivalent ("m" root of "a" to the "n" = "a" to the "m / n"). Example = 12th root of 7
 21.mod(12) //Module
 21 % 12 //Also module
-(0..24)%7 //Demonstration of how module works (keeping 24 values within 0 - 6)
+(0..24) % 7 //Demonstration of how module works (keeping 24 values within 0 - 6)
 
 //Other calculations:
 13.nextPowerOfTwo; //Next power of 2 from that number onwards.
@@ -140,8 +140,7 @@ a.value
 
 //Less useless example:
 (
-f = {
-	|value1 = 1, value2 = 5, deviation = 0.9| //Default values.
+f = { |value1 = 1, value2 = 5, deviation = 0.9| //Default values.
 	var result;
 
 	result = value1 + value2;
@@ -154,8 +153,7 @@ f.value(deviation: 0.99) //Keyword assignment.
 
 //Area of a trapezoid A = ((a + b) / 2) * h:
 (
-{
-	arg shortBase = 2, longBase = 3, height = 2;
+{ |shortBase = 2, longBase = 3, height = 2|
 	var area;
 
 	area = shortBase + longBase / 2;
@@ -188,7 +186,7 @@ Sandwich.prepare
 { SinOsc.ar }.play
 
 //Defining imaginary arguments:
-Sandwich {
+Sandwich{
 
 	*prepare{ arg extraIngredients = ['tomato', 'cheese'], //Class method.
 		bread = 'baguette',
@@ -200,7 +198,7 @@ Sandwich {
 	hitUp{ arg temp = 50, time = 120; //Instance methods.
 	}
 
-	cut { arg numPieces = 2;
+	cut{ arg numPieces = 2;
 	}
 }
 
@@ -355,7 +353,8 @@ SinOsc.ar(69.midicps, 0, 0.2, 0)
 SinOsc.ar(mul: 0.1, freq: 330)
 
 //Comparison: change of mul and change of add:
-({
+(
+{
 	[
 		SinOsc.ar(440, 0, 1), //Different mul: the function is flatter/wider.
 		SinOsc.ar(440,0, 4),
@@ -363,7 +362,8 @@ SinOsc.ar(mul: 0.1, freq: 330)
 }.plot(1/440, minval: -5, maxval: 5) //Displaying one cycle of the sine wave within amplitude values -5 to 5.
 )
 
-({
+(
+{
 	[
 		SinOsc.ar(440, 0, 1, 0), //Same mul different add: the function moves upward.
 		SinOsc.ar(440, 0, 1, 5)
@@ -372,8 +372,8 @@ SinOsc.ar(mul: 0.1, freq: 330)
 )
 
 //Modulating:
-({
-	var modulating, carrier;
+(
+{ var modulating, carrier;
 
 	modulating = SinOsc.ar(1, 0, 500, 1500);
 	modulating = modulating.round(125);
@@ -383,8 +383,8 @@ SinOsc.ar(mul: 0.1, freq: 330)
 )
 
 //Stereo signal two ways:
-({
-	var modulating, carrier;
+(
+{ var modulating, carrier;
 
 	modulating = SinOsc.ar(1, 0, 500, 1500);
 	modulating = modulating.round(125);
@@ -393,8 +393,8 @@ SinOsc.ar(mul: 0.1, freq: 330)
 }.play
 )
 
-({
-	var modulating, carrier;
+(
+{ var modulating, carrier;
 
 	modulating = SinOsc.ar(1, 0, 500, 1500);
 	modulating = modulating.round(125);
@@ -496,8 +496,7 @@ add = mul + low limit
 
 //Modulating with LFTri:
 (
-{
-	var modulating, carrier;
+{ var modulating, carrier;
 
 	modulating = LFTri.ar(1, 0, 500, 1500);
 	modulating = modulating.round(200);
@@ -619,17 +618,17 @@ add = mul + low limit
 { SinOsc.ar(5000, 0, LFDNoise0.ar(10, 0.3, 0.3)) }.play //Only amplitude modulation (constant freq).
 
 (
-{
-	var times;
+{ var times;
 
 	times = LFDNoise0.ar(1, 4.5, 5.5); //Modulation of an LFDNoise0's frequency with another LFDNoise0.
 
 	Mix(
 		SinOsc.ar(
-			Array.fill(5, { LFDNoise0.ar(times, 220, 660)}),
+			Array.fill(5, { LFDNoise0.ar(times, 220, 660) }),
 			0,
 			1/20) //Compensating the addition of signals.
-) !2}.play
+	) !2
+}.play
 )
 
 
@@ -862,7 +861,8 @@ s.meter
 			BPF.ar(noise, freqs[2], 0.05/freqs[2], amps[0]),
 			BPF.ar(noise, freqs[3], 0.05/freqs[3], amps[1]),
 			BPF.ar(noise, freqs[4], 0.05/freqs[4], amps[0])
-	])
+		]
+	)
 }.play
 )
 
@@ -874,8 +874,9 @@ s.meter
 			PinkNoise.ar,
 			Array.geom(16, 30, 3/2), //Pitagoric fifths (perfect fifths).
 			0.001,
-			5)
-	)!2
+			5
+		)
+	) !2
 }.play
 )
 
@@ -886,8 +887,9 @@ s.meter
 			PinkNoise.ar,
 			Array.geom(16, 30, 7.midiratio), //Tempered fifths (equal temperament).
 			0.001,
-			5)
-	)!2
+			5
+		)
+	) !2
 }.play
 )
 
@@ -898,8 +900,9 @@ s.meter
 			PinkNoise.ar,
 			Array.geom(8, 30, 2), //Octaves.
 			0.001,
-			3)
-	)!2
+			3
+		)
+	) !2
 }.play
 )
 
@@ -915,8 +918,9 @@ s.meter
 			PinkNoise.ar,
 			freqs,
 			0.005,
-			2)
-	)!2
+			2
+		)
+	) !2
 }.play
 )
 
@@ -934,8 +938,9 @@ s.meter
 			PinkNoise.ar,
 			freqs,
 			0.01,
-			amps)
-	)!2
+			amps
+		)
+	) !2
 }.play
 )
 
@@ -953,9 +958,10 @@ s.meter
 			Array.fill(8, { exprand(150, 14000) }),
 			1,
 			Array.fill(8, { exprand(0.002, 0.02) }) * 32
-        ],
+		],
 		{ PinkNoise.ar(0.01) } !2
-)}.play
+	)
+}.play
 )
 
 (
@@ -967,19 +973,21 @@ s.meter
 			[0.002, 0.012, 0.018, 0.013, 0.002, 0.012, 0.018, 0.013]
 		],
 		{ Dust.ar(3, 0.1) } !2
-)}.play
+	)
+}.play
 )
 
 (
 {
-    Klank.ar(
-        `[
-            [178.4, 570.3, 7384, 605, 356.9, 1150.6, 14768, 1210],
-            1,
-            [0.002, 0.012, 0.018, 0.013, 0.002, 0.012, 0.018, 0.013] * 16
-        ],
-        {Dust.ar(3, 0.1)} !2
-)}.play
+	Klank.ar(
+		`[
+			[178.4, 570.3, 7384, 605, 356.9, 1150.6, 14768, 1210],
+			1,
+			[0.002, 0.012, 0.018, 0.013, 0.002, 0.012, 0.018, 0.013] * 16
+		],
+		{ Dust.ar(3, 0.1) } !2
+	)
+}.play
 )
 
 
@@ -1126,6 +1134,7 @@ Env.perc(0.01, 0.25, 0.3, -4).plot
 	trigger = Impulse.ar(1); //Try with 2 and with Dust.
 	signal = SinOsc.ar;
 	env = EnvGen.ar(Env.perc (0.01, 0.5, 0.3), trigger);
+
 	signal * env
 }.play
 )
@@ -1143,7 +1152,7 @@ Env.perc(0.01, 0.25, 0.3, -4).plot
 
 	/*
 	freq = Array.fill(5, {
-		EnvGen.ar(Env(Array.fill(5, { exprand(60, 78).midicps }), [rrand(0.5, 3)], \step), trigger)
+	EnvGen.ar(Env(Array.fill(5, { exprand(60, 78).midicps }), [rrand(0.5, 3)], \step), trigger)
 	});
 	*/
 
@@ -1151,7 +1160,8 @@ Env.perc(0.01, 0.25, 0.3, -4).plot
 		SinOsc.ar(
 			freq,
 			0,
-			0.1)
+			0.1
+		)
 	) !2;
 
 	signal * 0.5
@@ -1171,8 +1181,7 @@ Env.adsr(attackTime, decayTime, sustainLevel, releaseTime, peakLevel, curve)
 
 //Applying gate:
 (
-a = {
-	|gate = 1|
+a = { |gate = 1|
 	var env;
 
 	env = EnvGen.ar(Env.adsr(0.1, 0.2, 0.5, 1, 0.6, -4), gate);
@@ -1186,8 +1195,7 @@ a.set(\gate, 1)
 
 //DoneAction = 2:
 (
-a = {
-	|gate = 1|
+a = { |gate = 1|
 	var env;
 
 	env = EnvGen.ar(Env.adsr(0.1, 0.2, 0.5, 1, 0.6, -4), gate, doneAction: 2);
