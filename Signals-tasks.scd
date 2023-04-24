@@ -28,14 +28,39 @@
 //Create a random impulse generator (Dust) with a density equal to 3 and filter the signal using 60 Ringz filters. Use exponential distributions to randomize the frequency and decay time of each filter. Then mix the 60 signals in a single channel:
 (
 {
-	Mix(
+	var in, signal;
+
+	in = Dust.ar(3);
+
+	signal = Array.fill(60, {
 		Ringz.ar(
-			Dust.ar(3),
-			Array.fill(60, { exprand(50, 3000) }),
-			Array.fill(60, { exprand(0.5, 5) }),
+			in,
+			exprand(200, 3000),
+			exprand(0.2, 0.5),
 			0.01
 		)
-	)
+	});
+
+	{ Mix(signal) } !2
+
+}.play
+)
+
+( //Equivalent option:
+{
+	var in, signal;
+
+	in = Dust.ar(3);
+
+	signal = Ringz.ar(
+		in,
+		Array.fill(60, { exprand(200, 3000) }),
+		Array.fill(60, { exprand(0.2, 0.5) }),
+		0.01
+	);
+
+	{ Mix(signal) } !2
+
 }.play
 )
 
