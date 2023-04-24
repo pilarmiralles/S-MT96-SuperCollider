@@ -148,6 +148,41 @@
 }.play
 )
 
+//(trying with Schroeder filter), hmmmm Idk:
+(
+{
+	var dry, wet, time;
+
+	time = 0.5;
+
+	dry = { Mix.ar(
+		Pulse.ar(
+			Array.fill(6, { exprand (60, 100) }),
+			LFDNoise1.ar(800, 0.3, 0.5).lag(0.001),
+			0.025
+		)
+	) } !2;
+
+	wet = Mix(
+		{ CombC.ar(
+			dry,
+			0.035,
+			rrand(0.025, 0.035),
+			time,
+			rrand(0.25, 0.5)
+		)
+		} !8
+	);
+
+	wet = LeakDC.ar(wet);
+
+	4.do({wet = AllpassN.ar(wet, 0.05, { rrand(0.005, 0.05)} !2, time) });
+
+	dry + (LPF.ar(wet, 3000) * -6.dbamp)
+
+}.play
+)
+
 //8 - Organ synthesizer (cheap Bach XD):
 (
 { var freqEnv, durEnv, freqs, amps, trigger = 1, signal, envPerc;
@@ -173,4 +208,70 @@
 	FreeVerb.ar(signal * envPerc, 0.7, 0.8, 0.5, 2.5)
 
 }.play
+)
+
+//9 - Water drops from a tap:
+(
+SynthDef(
+	\stupidGliss,
+	{ arg out, start, end, masterVolume, envTime;
+		var signal;
+
+		signal = { Mix(
+			Array.fill(100, {
+
+				SinOsc.ar(
+					XLine.ar(start, end, envTime, doneAction:2),
+					0,
+					XLine.ar(0.2, 0.001, envTime, doneAction:2)
+				) * masterVolume
+			})
+		) } !2;
+
+		Out.ar(out, signal)
+}).add;
+SynthDef(
+	\reverb,
+	{ arg in, time = 0.5, masterVolume = 1;
+		var input, wet, finalSignal;
+
+		input = In.ar(in, 2);
+
+		wet = Mix(
+			{ CombC.ar(
+				input,
+				0.035,
+				rrand(0.025, 0.035),
+				time,
+				rrand(0.25, 0.5)
+			)
+			} !12
+		);
+
+		wet = LeakDC.ar(wet);
+
+		4.do({wet = AllpassN.ar(wet, 0.05, { rrand(0.005, 0.05)} !2, time) });
+
+		finalSignal = input + (LPF.ar(wet, 3000) * -6.dbamp); //Can change the balance between both signals.
+
+		OffsetOut.ar(0, finalSignal * masterVolume)
+}).add
+)
+
+(
+Routine({
+	var start, end;
+
+	Synth(\reverb, [\in, 4, \time, 0.2, \masterVolume, 0.7], s, 'addToTail'); //Can increase / decrease the time of the reverb.
+
+	start = Prand((200..500), inf).asStream; //Can change the ranges of frequencies.
+	end = Prand((900..1300), inf).asStream;
+
+	inf.do({
+
+		Synth(\stupidGliss, [\out, 4, \start, start.next, \end, end.next, \envTime, 0.3, \masterVolume, 0.01]);
+
+		rrand(0.3, 1.7).wait //Can change waiting time.
+	})
+}).play
 )
