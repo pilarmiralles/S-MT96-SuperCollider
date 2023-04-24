@@ -54,7 +54,7 @@ f.value("dog")
 
 //Given an array of integers, create a function that returns the array from the middle value to the last element (if there are two middle values, take the second. For this last step, a conditional is needed. Skip if no knowledge yet):
 (
-f = { |array = [1, 2, 3, 4, 5]|
+f = { arg array = [1, 2, 3, 4, 5]; //For some reason (see doubts document), this one does not work with ||
 	var size, middle;
 
 	size = array.size;
