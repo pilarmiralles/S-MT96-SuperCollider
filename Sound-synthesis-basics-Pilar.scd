@@ -720,6 +720,8 @@ s.meter
 { SinOsc.ar(440, 0, 0.1) }.scope //Coming out through left channel (index 0).
 { SinOsc.ar(440, 0, 0.1 !2) }.scope //Coming out through L-R channels (indexes 0-1).
 { SinOsc.ar(440, 0, 0.1 !2) }.scope(outbus: 10) //Changing it to channels 10-11 (we can visualize it, but not listen to it as we don't have 12 loudspeakers).
+{ [SinOsc.ar(300, 0, 0.1), SinOsc.ar(500, 0, 0.1)] }.play //One frequency on each side.
+{ SinOsc.ar([300, 500], 0, 0.1) }.play //Equivalent to the former line.
 (
 {
 	[
@@ -805,7 +807,12 @@ s.meter
 )
 
 { Mix(SinOsc.ar({ exprand(30, 8000) } !100, 0, 1/200)) !2 }.play //Mono-duplicated (same frequencies on both sides).
+{ Mix(SinOsc.ar({ exprand(30, 8000) } !100, 0, 1/200)).dup(2) }.play //Equivalent using method .dup.
 { { Mix(SinOsc.ar({ exprand(30, 8000) } !100, 0, 1/200)) } !2 }.play //Duplicated function (different frequencies on each side, richer sound).
+{ { Mix(SinOsc.ar({ exprand(30, 8000) } !100, 0, 1/200)) }.dup(2) }.play //Equivalent using method .dup.
+
+//Splay:
+{ Splay.ar((SinOsc.ar({ exprand(30, 8000) } !100, 0, 1)), 1, 0.1) }.scope //Only 100 freqs, but distributed over the stereo field.
 
 //Comparing these two codes:
 (

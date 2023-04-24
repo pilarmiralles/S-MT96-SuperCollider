@@ -78,7 +78,7 @@ f.value([1, 2, 3, 4, 5, 6, 7])
 }.value
 )
 
-//ADVANCED: Symmetric difference algorithm. Create a function that compares two arrays of numbers and gives back an array with all numbers that are present inly in one of the arrays. For example, comparing [1, 2, 3, 4] and [2, 3, 4, 5], the result should be [1, 5].
+//ADVANCED: Symmetric difference algorithm. Create a function that compares two arrays of numbers and gives back an array with all numbers that are present only in one of the arrays. For example, comparing [1, 2, 3, 4] and [2, 3, 4, 5], the result should be [1, 5].
 //(My approach + other solutions in the additional document): comparing each element of the first array: asking the second array how many instances are in there of each element of the first array (if no instances, it passes to the final array) + same viceversa + concatenate both results at the end:
 (
 a = { |array1, array2|
@@ -97,11 +97,13 @@ a = { |array1, array2|
 	});
 
 	finalArray = result1 ++ result2;
+	"repetitions might occur:".postln;
 	finalArray.postln;
 
 	//Filtering repetitions:
 
 	finalArray = finalArray.as(Set); //See theory about Set (there is a method which performs this function directly between Sets).
+	"filtered repetitions:".postln;
 	finalArray = finalArray.as(Array)
 }
 )

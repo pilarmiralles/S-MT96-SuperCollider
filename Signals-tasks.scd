@@ -30,7 +30,7 @@
 {
 	var in, signal;
 
-	in = Dust.ar(3);
+	in = Dust.ar(3); //Beware, if Dust is not put into a variable, when using Array.fill to duplicate the entire Ringz, 60 different Dust will be produced!
 
 	signal = Array.fill(60, {
 		Ringz.ar(
@@ -46,7 +46,7 @@
 }.play
 )
 
-( //Equivalent option:
+( //Equivalent option (though now we could apply Dust to the Ringz filter without the variable and we would only have one Dust!
 {
 	var in, signal;
 
