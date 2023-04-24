@@ -94,7 +94,7 @@
 }.play
 )
 
-//Deconstruct the following multichannel expansion into an array of signal separated by commas. Make a proper distribution of the different parameters for each signal:
+//Deconstruct the following multichannel expansion into an array of signals separated by commas. Make a proper distribution of the different parameters for each signal:
 
 //Given code:
 (

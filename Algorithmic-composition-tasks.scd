@@ -1,5 +1,5 @@
 /*
-Combine the use of patterns within a Routine (patterns generate values / Routine asks for values to patterns and creaters synths) following these instructions:
+Combine the use of patterns within a Routine (patterns generate values / Routine asks for values to patterns and creates synths) following these instructions:
 - Use the following SynthDef \sinePerc.
 - Use the following array of MIDI notes: [ 7, 7, 9, 7, 9, 11, 9, 7, 6, 4, 2 ] + 72.
 - Use the following array of durations: [1, 1, 1/8, 1/8, 1/2, 1/4, 1/2, 1/4, 1/4, 1/2, 1.5]
