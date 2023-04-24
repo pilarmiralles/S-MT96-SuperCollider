@@ -64,6 +64,19 @@
 }.play
 )
 
+( //Though for next exercise we need a simpler mono version so it can be panned:
+{
+	Mix(
+		Ringz.ar(
+			Dust.ar(3),
+			Array.fill(60, { exprand(200, 3000) }),
+			Array.fill(60, { exprand(0.2, 0.5) }),
+			0.01
+		)
+	)
+}.play
+)
+
 //From the former code: add an independent stereo panoramization for each filter and carry out a slow modulation of the position of each filter using a linear low frequency noise generator. Then mix the 60 signals into a two-channel signal:
 (
 {
