@@ -23,6 +23,18 @@
 }.value(8) //Example
 )
 
+( //Can also do it from fundamental freq in Hz:
+{ |n = 1, freq = 50|
+	var hz, midi;
+
+	hz = freq * n;
+	midi = hz.cpsmidi.round(1);
+
+	[hz, midi]
+
+}.value(3, 50)
+)
+
 //Create a function that checks whether a word (string of letters) is a palindrome or not:
 (
 f = { |word|
@@ -55,6 +67,16 @@ f = { |array = [1, 2, 3, 4, 5]|
 )
 
 f.value([1, 2, 3, 4, 5, 6, 7])
+
+( //No conditional (works only for odd-sized arrays):
+{ arg array = [1, 2, 3, 4, 5];
+	var midValue;
+
+	midValue = (array.size / 2).round(1) - 1;
+	array[midValue.asInt..]
+
+}.value
+)
 
 //ADVANCED: Symmetric difference algorithm. Create a function that compares two arrays of numbers and gives back an array with all numbers that are present inly in one of the arrays. For example, comparing [1, 2, 3, 4] and [2, 3, 4, 5], the result should be [1, 5].
 //(My approach + other solutions in the additional document): comparing each element of the first array: asking the second array how many instances are in there of each element of the first array (if no instances, it passes to the final array) + same viceversa + concatenate both results at the end:
