@@ -52,3 +52,30 @@ Routine({ var nextDur, newTempo = 1; //I need a default value because of the i !
 
 }).play
 )
+
+//Another option, pretty much the same:
+(
+Routine({
+	var freqs, durs, durDev = 1;
+
+	freqs = Pseq([ 7, 7, 9, 7, 9, 11, 9, 7, 6, 4, 2 ] + 72, inf).asStream;
+	durs = Pseq([1, 1, 1/8, 1/8, 1/2, 1/4, 1/2, 1/4, 1/4, 1/2, 1.5], inf).asStream;
+
+	inf.do({ |i|
+		var thisDur;
+
+		if(((i % 11) == 0).and(i != 0), { durDev = [0.5, 0.75, 1, 1.25, 1.5, 2].choose });
+
+		thisDur = durs.next * durDev;
+
+		Synth(\sinePerc, [
+			\freq, freqs.next.midicps,
+			\amp, 0.2,
+			\durEnv, 1 * thisDur,
+			\pan, 0
+		]);
+		thisDur.wait
+	})
+
+}).play
+)
