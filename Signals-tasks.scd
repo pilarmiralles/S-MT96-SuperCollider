@@ -1,6 +1,6 @@
 //Signals - Tasks
 
-//Modulate the frequency of a sine oscillator from 65 to 3961 Hz using another sine oscillator. The period of the modulating signal should be 11 seconds. Adjust the phase so that the modulation starts at 3960 Hz:
+//Modulate the frequency of a sine oscillator from 65 to 3961 Hz using another sine oscillator. The period of the modulating signal should be 11 seconds. Adjust the phase so that the modulation starts at 3961 Hz:
 (
 {
 	SinOsc.ar(
