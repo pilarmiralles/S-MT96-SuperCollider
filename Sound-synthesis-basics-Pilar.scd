@@ -36,7 +36,7 @@ inf //Infinite.
 \abc == \abc //True
 \abc === \abc //True
 
-"abc" == "abc" //Trueb
+"abc" == "abc" //True
 "abc" === "abc" //False
 
 //Other special values:
@@ -66,8 +66,8 @@ HPF
 5.div(2) //Division, but returning only integers (rounding down)
 2 ** 7 //Power
 2.pow(7) //Power (applied as method)
-8.sqrt //Squared root
-27.cbrt //Cubic root
+9.sqrt //Squared root (3*3 = 9)
+27.cbrt //Cubic root (3*3*3 = 27)
 7.pow(1/12) //Calculating the "x" root of a number using its power equivalent ("m" root of "a" to the "n" = "a" to the "m / n"). Example = 12th root of 7
 21.mod(12) //Module
 21 % 12 //Also module
@@ -78,8 +78,9 @@ HPF
 44.nextPrime; //Next prime number from that number onwards.
 4.nthPrime; //The fourth prime number in the series of prime numbers.
 34.61946.round(0.01) //Rounding to two decimals (rounding up from 5, down from 4). The argument defines the number of decimals.
-440.midicps //Midi to Hz converter.
-69.cpsmidi //Hz to midi converter.
+72.round(30) //Keeps number within the multiples of the .round argument value (useful for overtones).
+69.midicps //Midi to Hz converter.
+440.cpsmidi //Hz to midi converter.
 1.57.asInteger //Turns a float into an integer by rounding down (also shortcut .asInt).
 
 //Randomness with numbers:
@@ -89,8 +90,8 @@ HPF
 5.xrand(1) //Excludes 1.
 5.xrand2 //Includes negative values (no 0 by default).
 10.rand2 //Includes negative values (including 0).
-rrand(0.1, 4) //Random numbers within a range with uniform distribution (both integers = integers only; at least one of them float = all float results) --> Polumosphism: "the ability for different kinds of objects to respond differently to the same message".
-exprand(1, 4)//Random numbers within a range with exponential distribution (results will always be float regardless of type of input). It can't start by of cross zero.
+rrand(0.1, 4) //Random numbers within a range with uniform distribution (both integers = integers only; at least one of them float = all float results) --> Polymorphism: "the ability for different kinds of objects to respond differently to the same message" (different kinds ob object: int / float | same message: rrand).
+exprand(1, 4)//Random numbers within a range with exponential distribution (results will always be float regardless of type of input). The lo/hi limit cannot be zero and the range cannot cross zero.
 
 
 //TYPES OF BRACKETS
@@ -189,7 +190,7 @@ Sandwich.prepare
 Sandwich{
 
 	*prepare{ arg extraIngredients = ['tomato', 'cheese'], //Class method.
-		bread = 'baguette',
+		bread = 'baguette', //Default values for its arguments.
 		meat = 'chicken';
 		...
 		...
@@ -202,10 +203,10 @@ Sandwich{
 	}
 }
 
-//Modifying the imaginary arguments:
+//Applying out imaginary methods to our imaginary classes:
 
 Sandwich.prepare(['tomato'], 'baguette', 'tofu')
-Sandwich.prepare(meat: 'tofu')
+Sandwich.prepare(meat: 'tofu') //Keyword assignment.
 
 //Now adding the other class:
 a = Sandwich.prepare(
@@ -237,7 +238,7 @@ a[5].play //Applying the method .play to the function in index 5.
 
 //CLASS METHODS for arrays:
 //Array.fill:
-Array.fill(6, { rrand (0, 11) }) //Six random numbers from 0 to 11.
+Array.fill(6, { rrand(0, 11) }) //Six random numbers from 0 to 11.
 
 Array.fill(6, { |i| i }) //Using the "index" argument: printing the index numbers (0 to 5).
 
@@ -285,13 +286,13 @@ z = z.drop(-2) //Deleting two elements successively from the last element.
 Array.series(200, 0, 1) //Very long array: cannot see all elements when printed.
 Array.series(200, 0, 1).asCompileString //The array will be entirely printed (also shortcut .cs). Need to be careful with this tho, as SC saves memory for a reason.
 Array.series(200, 0, 1).last //We can ask to see just the last element.
-Array.series(200, 0, 1).lastIndex //Shows the index of the last element.
+Array.series(200, 0, 1).lastIndex //Shows the index of the last element (in this case, same value).
 
-[ 0, 1, 2, 3 ].choose //Chooses one random element from the collection.
-[ 0, 1, 2, 3 ].wchoose([ 0.2, 0.3, 0.49, 0.01 ]) //Chooses one random element according to the probability shown in the argument "weights" (total sum of 1).
-[ 0, 1, 2, 3 ].wchoose([ 5, 8, 4, 2 ].normalizeSum) //Using the method .normalizeSum to turn any values into ratios between 0 and 1.
-[ 0, 1, 2, 3 ].rotate(1) //Rotate elements one space to the right.
-[ 0, 1, 2, 3 ].rotate(-2) //Rotate elements two spaces to the left.
+[0, 1, 2, 3].choose //Chooses one random element from the collection.
+[0, 1, 2, 3].wchoose([0.2, 0.3, 0.49, 0.01]) //Chooses one random element according to the probability shown in the argument "weights" (total sum of 1).
+[0, 1, 2, 3].wchoose([5, 8, 4, 2].normalizeSum) //Using the method .normalizeSum to turn any values into ratios between 0 and 1.
+h = [0, 1, 2, 3].rotate(1) //Rotate elements one space to the right, assigned to variable "h".
+h = h.rotate(-2) //Rotate elements two spaces to the left successively.
 [1, 2, 3, 4, 5].sum //Addition of the elements of an homogeneous array. Could be used to sum an array of signals into one channel (beware the amplitude).
 
 //Arithmetic operations between arrays of different sizes:
@@ -327,7 +328,7 @@ m.stutter(2) //Repeats each element of the array as many times as indicated in i
 (0..20) //Array from 0 to 20 (step of 1).
 (60, 60.25..65) //Array from 60 to 65 (step of 0.25).
 (rrand(10, 15)..rrand(16, 20)) //Array between a random value between 10 and 15, and a random value between 16 and 20.
-pow((0..1000), 2).plot //Applying the power of 2 to an array from 0 to 100, then visualizing it (exponential curve).
+pow((0..1000), 2).plot //Applying the power of 2 to an array from 0 to 1000, then visualizing it (exponential curve).
 sin((0, 0.1..20)).plot //Applying a sin function (values from -1 to 1)
 
 //Indexes:
@@ -720,8 +721,6 @@ s.meter
 { SinOsc.ar(440, 0, 0.1) }.scope //Coming out through left channel (index 0).
 { SinOsc.ar(440, 0, 0.1 !2) }.scope //Coming out through L-R channels (indexes 0-1).
 { SinOsc.ar(440, 0, 0.1 !2) }.scope(outbus: 10) //Changing it to channels 10-11 (we can visualize it, but not listen to it as we don't have 12 loudspeakers).
-{ [SinOsc.ar(300, 0, 0.1), SinOsc.ar(500, 0, 0.1)] }.play //One frequency on each side.
-{ SinOsc.ar([300, 500], 0, 0.1) }.play //Equivalent to the former line.
 (
 {
 	[
@@ -807,12 +806,7 @@ s.meter
 )
 
 { Mix(SinOsc.ar({ exprand(30, 8000) } !100, 0, 1/200)) !2 }.play //Mono-duplicated (same frequencies on both sides).
-{ Mix(SinOsc.ar({ exprand(30, 8000) } !100, 0, 1/200)).dup(2) }.play //Equivalent using method .dup.
 { { Mix(SinOsc.ar({ exprand(30, 8000) } !100, 0, 1/200)) } !2 }.play //Duplicated function (different frequencies on each side, richer sound).
-{ { Mix(SinOsc.ar({ exprand(30, 8000) } !100, 0, 1/200)) }.dup(2) }.play //Equivalent using method .dup.
-
-//Splay:
-{ Splay.ar((SinOsc.ar({ exprand(30, 8000) } !100, 0, 1)), 1, 0.1) }.scope //Only 100 freqs, but distributed over the stereo field.
 
 //Comparing these two codes:
 (
