@@ -367,9 +367,9 @@ SinOsc.ar(mul: 0.1, freq: 330)
 {
 	[
 		SinOsc.ar(440, 0, 1, 0), //Same mul different add: the function moves upward.
-		SinOsc.ar(440, 0, 1, 5)
+		SinOsc.ar(440, 0, 1, 2)
 	]
-}.plot(1/440, minval: -5, maxval: 5) //Displaying one cycle of the sine wave within amplitude values -5 to 5.
+}.plot(1/440, minval: -3, maxval: 3) //Displaying one cycle of the sine wave within amplitude values -3 to 3.
 )
 
 //Modulating:
@@ -399,12 +399,12 @@ SinOsc.ar(mul: 0.1, freq: 330)
 
 	modulating = SinOsc.ar(1, 0, 500, 1500);
 	modulating = modulating.round(125);
-	carrier = Pan2.ar(SinOsc.ar(modulating, 0, 0.2 !2, 0), 0) //Pan2.
+	carrier = Pan2.ar(SinOsc.ar(modulating, 0, 0.2, 0), -1) //Pan2.
 
 }.play
 )
 
-//Calculation of mul / add in modulations:
+//Calculation of mul / add in modulations (example 440-880 Hz):
 /*
 mul = high limit - low limit / 2
 add = mul + low limit
@@ -553,15 +553,15 @@ add = mul + low limit
 )
 
 //Modulating with LFPulse:
-{ SinOsc.ar(440) * LFPulse.ar(1) }.play
+{ (SinOsc.ar(440) * LFPulse.ar(1)) * 0.2 }.play
 
 
 //Saw tooth wave:
-{ Saw.ar(440, 0.5, 0.5) }.plot(2/440)
-{ Saw.ar(440, 0.5, 0.1) }.scope
+{ Saw.ar(440, 0.1, 0) }.plot(2/440)
+{ Saw.ar(440, 0.1, 0) }.scope
 
-{ LFSaw.ar(440, 0, 0.5, 0.5) }.plot(2/440)
-{ LFSaw.ar(440, 0, 0.5, 0.1) }.scope
+{ LFSaw.ar(440, 0, 0.1, 0) }.plot(2/440)
+{ LFSaw.ar(440, 0, 0.1, 0) }.scope
 
 //Building a saw tooth wave out of sine waves:
 (
@@ -595,14 +595,14 @@ add = mul + low limit
 	+
 	SinOsc.ar (freq * 14, 0, 1/14)
 	+
-	SinOsc.ar (freq * 14, 0, 1/14)
+	SinOsc.ar (freq * 15, 0, 1/15)
 	*
 	0.1 //Total amplitude * 0.1.
 }.scope
 )
 
 //Modulating with LFSaw:
-{ SinOsc.ar(LFSaw.ar(1, 0, 400, 1000), 0, 0.3) }.play
+{ SinOsc.ar(LFSaw.ar(1, 0, 400, 1000), 0, 0.1 !2) }.play
 
 
 //Low frequency noise generators:
@@ -614,7 +614,7 @@ add = mul + low limit
 { SinOsc.ar(LFDNoise1.ar(10, 500, 1000), 0, 0.3) }.play //Linear interpolation.
 { SinOsc.ar(LFDNoise3.ar(10, 500, 1000), 0, 0.3) }.play //Cubic interpolation.
 
-{ SinOsc.ar(LFDNoise3.ar(10, 12, 60).midicps, 0, LFDNoise3.ar(3).max(0)) }.play //Applied to two parameters and using the method .max
+{ SinOsc.ar(LFDNoise3.ar(10, 12, 60).midicps, 0, LFDNoise3.ar(3, 0.5, 0).max(0)) }.play //Applied to two parameters and using the method .max
 
 { SinOsc.ar(5000, 0, LFDNoise0.ar(10, 0.3, 0.3)) }.play //Only amplitude modulation (constant freq).
 
@@ -694,7 +694,7 @@ FreqScope.new //Visualization.
 }.play
 )
 
-{ RHPF.ar(PinkNoise.ar, 1000, 0.01, 0.5) }.play
+{ RHPF.ar(PinkNoise.ar, 1000, 0.01, 0.2) }.play
 
 (
 {
@@ -707,7 +707,7 @@ FreqScope.new //Visualization.
 }.play
 )
 
-{ Ringz.ar(Impulse.ar(1), 440, 0.5, 0.3) }.play
+{ Ringz.ar(Impulse.ar(1), 440, 0.5, 0.1) }.play
 { Ringz.ar(WhiteNoise.ar(1), 440, 1, 0.001) }.play
 
 
@@ -737,7 +737,7 @@ s.meter
 {
 	Mix(
 		SinOsc.ar(
-			Array.fill(100, { exprand(30, 8000)}),
+			Array.fill(100, { exprand(30, 8000) }),
 			0,
 			1/200
 		)
@@ -789,8 +789,8 @@ s.meter
 {
 	Mix(
 		[
-			[BrownNoise.ar(0.2), SinOsc.ar(220, 0, 0.2)],
-			[Dust.ar(50, 0.5), Saw.ar(LFDNoise3.ar(1, 3000, 4000), 0.2)],
+			[BrownNoise.ar(0.1), SinOsc.ar(220, 0, 0.1)],
+			[Dust.ar(50, 0.2), Saw.ar(LFDNoise3.ar(1, 3000, 4000), 0.1)],
 		]
 	)
 }.scope
@@ -808,11 +808,13 @@ s.meter
 { Mix(SinOsc.ar({ exprand(30, 8000) } !100, 0, 1/200)) !2 }.play //Mono-duplicated (same frequencies on both sides).
 { { Mix(SinOsc.ar({ exprand(30, 8000) } !100, 0, 1/200)) } !2 }.play //Duplicated function (different frequencies on each side, richer sound).
 
+{ Splay.ar(SinOsc.ar({ exprand(30, 8000) } !100, 0, 1/200), 1, 2.5) }.play //Splay: distribution of a mono signal in the stereo field.
+
 //Comparing these two codes:
 (
 {
 	Mix.ar(
-		Array.fill(18, { Ringz.ar(WhiteNoise.ar(0.0001), exprand (100, 3000)) })
+		Array.fill(18, { Ringz.ar(WhiteNoise.ar(0.0001), exprand(100, 3000)) })
 	) !2
 }.play
 )
@@ -822,7 +824,7 @@ s.meter
 	Mix.ar(
 		Ringz.ar(
 			WhiteNoise.ar(0.0001),
-			Array.fill(18, { exprand (100, 3000) })
+			Array.fill(18, { exprand(100, 3000) })
 		)
 	) !2
 }.play
@@ -832,7 +834,7 @@ s.meter
 (
 { var freqDeviation;
 
-	freqDeviation = LFNoise2.ar(0.0, 0.2, 1);
+	freqDeviation = LFNoise2.ar(0.05, 0.2, 1);
 
 	Mix(
 		BPF.ar(
@@ -844,7 +846,6 @@ s.meter
 	)
 }.play
 )
-
 
 (
 { var freqDeviation, noise, amps, freqs;
@@ -1134,7 +1135,7 @@ Env.perc(0.01, 0.25, 0.3, -4).plot
 
 	trigger = Impulse.ar(1); //Try with 2 and with Dust.
 	signal = SinOsc.ar;
-	env = EnvGen.ar(Env.perc (0.01, 0.5, 0.3), trigger);
+	env = EnvGen.ar(Env.perc(0.01, 0.5, 0.3), trigger);
 
 	signal * env
 }.play
@@ -1212,7 +1213,7 @@ a.set(\gate, 1)
 (
 { var gate, signal, env;
 
-	gate = LFPulse.ar(0.2, 0, 0.5);
+	gate = LFPulse.ar(0.5, 0, 0.5);
 
 	signal = SinOsc.ar;
 
@@ -1239,8 +1240,8 @@ a.set(\gate, 1)
 
 //Other examples:
 { BrownNoise.ar(0.3) * SinOsc.ar(LFDNoise3.ar(1, 1000, 2000)) }.play
-{ BrownNoise.ar(0.3 !2) * SinOsc.ar(500) }.play //Try out 100, 50, 20, 10 for the SinOsc frequency.
-{ Saw.ar(200) * LFDNoise3.ar(200 !2, 0.3) }.play
+{ BrownNoise.ar(0.2 !2) * SinOsc.ar(500) }.play //Try out 100, 50, 20, 10 for the SinOsc frequency.
+{ Saw.ar(200) * LFDNoise3.ar(200 !2, 0.2) }.play
 
 //Ring modulation applied to an audio sample:
 b = Buffer.read(s, Platform.resourceDir +/+ "sounds/a11wlk01.wav")
@@ -1275,11 +1276,11 @@ ring4: //(a * a * b) - (a * b * b)
 { SinOsc.ar(7000, 0, 0.2) ring4: SinOsc.ar(LFDNoise3.ar(3, 125, 7000), 0, 0.3 !2) }.play
 
 //Frequency modulation (FM):
-{ SinOsc.ar(500 + SinOsc.ar(1) * 0.2 !2 }.scope
-{ SinOsc.ar(500 + SinOsc.ar(1, 0, 20)) * 0.2 !2 }.scope
-{ SinOsc.ar(500 + SinOsc.ar(8, 0, 400)) * 0.2 !2 }.scope
-{ SinOsc.ar(500 + SinOsc.ar(22, 0, 400)) * 0.2 !2 }.scope //Audio rate limit.
-{ SinOsc.ar(500 + SinOsc.ar(80, 0, 400)) * 0.2 !2 }.scope
+{ SinOsc.ar(500 + SinOsc.ar(1)) * 0.1 !2 }.scope
+{ SinOsc.ar(500 + SinOsc.ar(1, 0, 20)) * 0.1 !2 }.scope
+{ SinOsc.ar(500 + SinOsc.ar(8, 0, 400)) * 0.1 !2 }.scope
+{ SinOsc.ar(500 + SinOsc.ar(22, 0, 400)) * 0.1 !2 }.scope //Audio rate limit.
+{ SinOsc.ar(500 + SinOsc.ar(80, 0, 400)) * 0.1 !2 }.scope
 
 { SinOsc.ar(MouseY.kr(500, 5000, 1).poll + SinOsc.ar(MouseX.kr(1, 2000, 1).poll, mul: LFNoise0.kr(8).range(400, 4500))) * 0.1 !2 }.scope
 
