@@ -4,17 +4,17 @@
 //INTRODUCTION (just in case) ITERATIONS AND ROUTINES (.do, Routine):
 
 //METHOD .do:
-//Grammar:
+//Syntax:
 [element1, element2, ...].do({ |item, iteration| function })
 
 //Example:
-([ 10, 20, 30, 40, 50 ].do({ |num| rrand(0, num).postln }))
+[10, 20, 30, 40, 50].do({ |num| rrand(0, num).postln })
 
 //Example using the iteration argument:
 (
 a = [0, 10, 20, 30, 40, 50];
 
-a[..4].do({ |num, i| rrand(a[i], a[i + 1]).postln }) //As in the former code, it print five random values between the limits imposed by the function.
+a[..4].do({ |num, i| rrand(a[i], a[i + 1]).postln }) //As in the former code, it prints five random values between the limits defined by the function.
 )
 
 //When receiving a single number:
@@ -64,7 +64,7 @@ r = Routine({
 
 	"hello".postln; //Needs .postln because it is not the line of the .yield.
 	synth1 = { SinOsc.ar(1000, 0, 0.05) }.play;
-	"synth1 created".yield; //As the method .yield is applied to this line, it is not necessary to use .yield.
+	"synth1 created".yield; //No need for .postln as this is the "last line of the function".
 
 	synth2 = { BrownNoise.ar(0.1) }.play;
 	"synth2 created".yield;
@@ -84,6 +84,7 @@ r = Routine({
 })
 )
 r.next
+r.reset
 
 //COMBINING .do AND ROUTINE
 
@@ -144,6 +145,7 @@ r.play
 r.clock
 r.clock.tempo
 r.clock.tempo = 100/60
+r.clock.tempo
 r.clock.tempo = 1 //= 60/60 //Setting back to 60bpm (second as a referential time unit) the default clock.
 
 //Independent clocks:
@@ -167,6 +169,8 @@ z = Routine({
 r.play(TempoClock(180/60)); //Three times faster than "z".
 z.play(TempoClock(60/60))
 )
+
+TempoClock.tempo = 1 //Let's reset this for the rest of the session.
 
 //First example of the instrument-score relationship (SynthDef-Routine):
 (
@@ -246,6 +250,7 @@ SynthDef(
 			),
 			doneAction: 2
 		);
+
 		Out.ar(0, signal * env)
 }).add
 )
@@ -358,7 +363,6 @@ SynthDef(
 		DetectSilence.ar(reverb, doneAction: 2);
 
 		Out.ar(out, reverb)
-
 	}
 ).add
 )
@@ -378,13 +382,11 @@ Routine({
 
 		Synth(\gendy3,
 			[
-
 				\freq, freqs.choose,
 				\crossTime, crossTime,
 				\sustTime, thisSustTime,
 				\out, 0,
 				\amp, [0.3, 0.2, 0.2, 0.6, 0.4] * 0.2,
-
 			]
 		);
 
@@ -399,7 +401,7 @@ Routine({
 (
 SynthDef(
 	\overlapFilter,
-	{ |freq, crossTime, sustTime, density|
+	{ |freq, crossTime = 5, sustTime = 5, density = 5|
 		var signal, env, individualAmp;
 
 		individualAmp = ((density.log2 + 1) * -3.01).dbamp * 0.5;
@@ -419,6 +421,7 @@ SynthDef(
 			),
 			doneAction: 2
 		);
+
 		Out.ar(0, signal * env)
 }).add
 )
@@ -500,6 +503,7 @@ SynthDef(
 		),
 		doneAction: 2
 	);
+
 	Out.ar(out, signalOut * env)
 }).add
 )
@@ -526,7 +530,7 @@ SynthDef(
 		10
 	);
 
-	CombC.ar(signal, 1/40, 1/40, 1.5, 0.2);
+	CombC.ar(signal, 1/40, 1/40, 1.5, 0.2); //Resonator.
 }.play
 )
 
@@ -557,13 +561,14 @@ Tdef(\underTheSea, {
 
     freqs = Array.fill(100, { exprand(60, 2500) });
 
+    inf.do({
+
     /* Tonal version:
     root = [19, 21, 22, 24, 26, 27, 29, 31].midicps.choose;
 
     freqs = Array.geom(6, root, 2);
     */
 
-    inf.do({
         Synth(\machinesComb,
             [
                 \freq, freqs.choose,
@@ -615,6 +620,7 @@ p = Platform.resourceDir +/+ "sounds/a11wlk01.wav"
 
 b = Buffer.read(s, p)
 b.query
+b.duration
 
 (
 SynthDef(
@@ -625,6 +631,7 @@ SynthDef(
 		signal = PlayBuf.ar(1, bufnum, rate, 1, position);
 		//signal = signal[0];
 		signal = Pan2.ar(signal, pan);
+
 		env = EnvGen.ar(
 			Env.sine(dur, amp),
 			doneAction: 2
@@ -635,7 +642,7 @@ SynthDef(
 }).add
 )
 
-Synth(\grain, [\bufnum, b.bufnum, \position, 1 * 44100, \rate, 1, \dur, 0.1, \pan, 0]) //Isolated grain.
+Synth(\grain, [\bufnum, b.bufnum, \position, 2 * 44100, \rate, 1, \dur, 0.1, \pan, 0]) //Isolated grain.
 
 (
 Routine({
@@ -920,7 +927,7 @@ Routine({
         durGrain = waitTime * superposition;
 
         speed = speedPattern.next;
-        speed.round(0.1).postln; //For testing.
+		speed.round(0.1).postln; //For testing.
 
         position = (position + waitTime) % durBuffer;
 
@@ -968,7 +975,7 @@ if (1 > 2, { "true".postln }, { "false".postln })
 
 if(3.odd) { "true".postln } { "false".postln }
 
-//If applied to a Routine:
+//If applied to a Routine (using the "i" argument):
 if ((i % 3) == 0, { function1 }, { function2 }) //Something happens every three iterations.
 if (i.asInt.even, { function1 }, { function2 }) //Alternating between two options.
 if (0.5.coin.and(i != 0), { function1 }, { function2 }) //Avoiding applying condition to the first iteration.
@@ -990,7 +997,7 @@ while(
 (
 var value;
 
-value = rrand(1, 20);
+value = rrand(0, 20);
 
 switch
 (value % 4)
@@ -1273,7 +1280,7 @@ Routine({
             [
                 \freq, 4000,
                 \durEnv, thisDur,
-                \pan, pan.next * (thisDur/newArray.last).postln,
+				\pan, (pan.next * (thisDur/newArray.last)).postln,
                 \amp, 0.1
             ]
         );
@@ -1332,7 +1339,7 @@ SynthDef(
 	{ |freq|
 		var signal;
 
-		signal = Saw.ar(freq) * EnvGen.ar(Env.sine(0.3, 0.05), doneAction: 2);
+		signal = Saw.ar(freq, 0.2) * EnvGen.ar(Env.sine(0.3, 0.05), doneAction: 2);
 
 		OffsetOut.ar(0, signal !2)
 
@@ -1343,8 +1350,8 @@ SynthDef(
 var lineA, lineB;
 
 lineA = Pseg( //Bottom line.
-	Pseq([85, 100, 10], inf),
-	Pseq([10, 10, 0], inf),
+	Pseq([85, 100, 10], inf), //Values
+	Pseq([10, 10, 0], inf), //Times
 );
 lineB = Pseg( //Top line.
 	Pseq([90, 100, 70], inf),
