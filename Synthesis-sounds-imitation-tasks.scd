@@ -214,19 +214,17 @@
 (
 SynthDef(
 	\stupidGliss,
-	{ arg out, start, end, masterVolume, envTime;
+	{ arg out, start, end, masterVolume, envTime, pos = 0;
 		var signal;
 
-		signal = { Mix(
-			Array.fill(100, {
-
-				SinOsc.ar(
-					XLine.ar(start, end, envTime, doneAction:2),
-					0,
-					XLine.ar(0.2, 0.001, envTime, doneAction:2)
-				) * masterVolume
-			})
-		) } !2;
+		signal = Pan2.ar(
+			SinOsc.ar(
+				XLine.ar(start, end, envTime, doneAction:2),
+				0,
+				XLine.ar(0.2, 0.001, envTime, doneAction:2)
+			),
+			pos
+		) * masterVolume;
 
 		Out.ar(out, signal)
 }).add;
@@ -260,16 +258,18 @@ SynthDef(
 
 (
 Routine({
-	var start, end;
+	var start, end, pos;
 
 	Synth(\reverb, [\in, 4, \time, 0.2, \masterVolume, 0.7], s, 'addToTail'); //Can increase / decrease the time of the reverb.
 
 	start = Prand((200..500), inf).asStream; //Can change the ranges of frequencies.
 	end = Prand((900..1300), inf).asStream;
 
+	pos = Pwhite(-0.8, 0.8, inf).asStream;
+
 	inf.do({
 
-		Synth(\stupidGliss, [\out, 4, \start, start.next, \end, end.next, \envTime, 0.3, \masterVolume, 0.01]);
+		Synth(\stupidGliss, [\out, 4, \start, start.next, \end, end.next, \envTime, 0.3, \masterVolume, 0.4, \pos, pos.next]);
 
 		rrand(0.3, 1.7).wait //Can change waiting time.
 	})
