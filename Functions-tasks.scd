@@ -54,14 +54,14 @@ f.value("dog")
 
 //Given an array of integers, create a function that returns the array from the middle value to the last element (if there are two middle values, take the second. For this last step, a conditional is needed. Skip if no knowledge yet):
 (
-f = { arg array = [1, 2, 3, 4, 5]; //For some reason (see doubts document), this one does not work with ||
+f = { |array|
 	var size, middle;
 
 	size = array.size;
 
 	if (size.odd, {middle = (size / 2).roundUp - 1}, {middle = size / 2}); //The result of this is an INDEX.
 
-	array[middle.asInt..]
+	array[middle.asInteger..]
 
 }
 )
@@ -69,13 +69,13 @@ f = { arg array = [1, 2, 3, 4, 5]; //For some reason (see doubts document), this
 f.value([1, 2, 3, 4, 5, 6, 7])
 
 ( //No conditional (works only for odd-sized arrays):
-{ arg array = [1, 2, 3, 4, 5];
+{ |array|
 	var midValue;
 
 	midValue = (array.size / 2).round(1) - 1;
-	array[midValue.asInt..]
+	array[midValue.asInteger..]
 
-}.value
+}.value([1, 2, 3, 4, 5])
 )
 
 //ADVANCED: Symmetric difference algorithm. Create a function that compares two arrays of numbers and gives back an array with all numbers that are present only in one of the arrays. For example, comparing [1, 2, 3, 4] and [2, 3, 4, 5], the result should be [1, 5].

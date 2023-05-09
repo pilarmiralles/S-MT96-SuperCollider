@@ -4,11 +4,8 @@
 //DATA TYPES
 
 //Limits of integer numbers:
+2 ** 31
 2147483647 + 1 //Crossing the limit
-
-//Is this a bug? (lower limit)
--2147483648 + 1 //-2147483646
--2147483646 - 1 //-2147483647
 
 //Limits of float representation:
 (-1, -0.8..1)
