@@ -70,6 +70,11 @@ HPF
 21 % 12 //Also module
 (0..24) % 7 //Demonstration of how module works (keeping 24 values within 0 - 6)
 
+//Operations hierarchy:
+//In SC, all operations are calculated from left to right no matter the kind of operations involved:
+2 + 3 * 3 //15
+2 + (3 * 3) //11 (prioritizing the product)
+
 //Other calculations:
 13.nextPowerOfTwo; //Next power of 2 from that number onwards.
 44.nextPrime; //Next prime number from that number onwards.
