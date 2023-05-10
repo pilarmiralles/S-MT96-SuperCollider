@@ -1,4 +1,4 @@
-//Sound synthesis basics - Presentation (beginner group)
+b//Sound synthesis basics - Presentation (beginner group)
 /////////////////////////////////////////////////////////////////////
 
 //DATA TYPES
@@ -342,17 +342,19 @@ j[..3] //Taking indexes from the first one up to the fourth (including the fourt
 /////////////////////////////////////////////////////////////////////////////////
 
 //UGENS: SINOSC
+//Unit Generators or UGens are classes that create or process signals:
+UGen
 
-//First UGen: SinOsc:
+//First UGen: SinOsc, sine wave oscillator:
 SinOsc
 
-//Visualization (one period):
-{ SinOsc.ar(440, 0, 0.1, 0) }.plot(1/440)
+//Visualization of a sine wave at 440 (one cycle):
+{ SinOsc.ar(440) }.plot(1/440)
 
-//Arguments:
-SinOsc.ar(69.midicps, 0, 0.2, 0)
+//Arguments: frequency, phase, mul, add:
+SinOsc.ar(67.midicps, 0, 0.2, 0)
 
-//Using keyword assignment:
+//Using keyword assignment: any arguments in any order:
 SinOsc.ar(mul: 0.1, freq: 330)
 
 //Comparison: change of mul and change of add:
@@ -374,12 +376,16 @@ SinOsc.ar(mul: 0.1, freq: 330)
 }.plot(1/440, minval: -3, maxval: 3) //Displaying one cycle of the sine wave within amplitude values -3 to 3.
 )
 
-//Modulating:
+//Function.play: in order to obtain sound, we need to apply the method .play to a function containing our UGen:
+{ SinOsc.ar(67.midicps, 0, 0.2, 0) }.play
+
+//Modulating (low frequency): a modulation is the periodic or aperiodic modification of a parameter of a signal (normally, by using another signal):
 (
 { var modulating, carrier;
 
 	modulating = SinOsc.ar(1, 0, 500, 1500);
 	modulating = modulating.round(125);
+
 	carrier = SinOsc.ar(modulating, 0, 0.2, 0)
 
 }.play
@@ -391,7 +397,8 @@ SinOsc.ar(mul: 0.1, freq: 330)
 
 	modulating = SinOsc.ar(1, 0, 500, 1500);
 	modulating = modulating.round(125);
-	carrier = SinOsc.ar(modulating, 0, 0.2 !2, 0) //Duplicator.
+
+	carrier = SinOsc.ar(modulating, 0, 0.2 !2, 0) //Duplicator (applied to the mul argument).
 
 }.play
 )
@@ -401,7 +408,8 @@ SinOsc.ar(mul: 0.1, freq: 330)
 
 	modulating = SinOsc.ar(1, 0, 500, 1500);
 	modulating = modulating.round(125);
-	carrier = Pan2.ar(SinOsc.ar(modulating, 0, 0.2, 0), -1) //Pan2.
+
+	carrier = Pan2.ar(SinOsc.ar(modulating, 0, 0.2, 0), 0) //Pan2 (pos argument: 0 = center, -1 = left, 1 = right, and everything in between).
 
 }.play
 )
@@ -412,11 +420,23 @@ mul = high limit - low limit / 2
 add = mul + low limit
 */
 
-//Former range applied to signals:
+//Former range applied to signals: observe the numbers printed by .poll to check the low and high limits of the modulation (440-880):
 (
 {
 	SinOsc.ar(
-		SinOsc.ar(1/2, 0, 220, 660).poll(5), //Other phase values: 0.5pi, 1pi, 1.5pi...
+		SinOsc.ar(1/2, 0, 220, 660).poll(10), //Try other phase values: 0.5pi, 1pi, 1.5pi...
+		0,
+		0.2 !2,
+		0
+	)
+}.play
+)
+
+//Alternative: method .range: same result:
+(
+{
+	SinOsc.ar(
+		SinOsc.ar(1/2, 0).range(440, 880).poll(10), //Try other phase values: 0.5pi, 1pi, 1.5pi...
 		0,
 		0.2 !2,
 		0
@@ -428,22 +448,22 @@ add = mul + low limit
 (
 {
 	SinOsc.ar(
-		SinOsc.ar(1/10,1.5pi, 100, 400),
+		SinOsc.ar(1/10,1.5pi, 100, 400), //Frequency modulation (low freq).
 		0,
-		SinOsc.ar(2, 0, 0.25 !2, 0.25)
+		SinOsc.ar(2, 0, 0.25 !2, 0.25) //Amplitude modulation (low freq).
 	) * 0.5
 }.play
 )
 
-//Modulating signal over 20 Hz:
+//Modulating signal over 20 Hz (creates a new spectrum):
 { SinOsc.ar(SinOsc.ar(880, 1.5pi, 100, 400), 0, 0.1 !2) }.play
 
 //Adding more levels of modulation:
 (
 {
-	SinOsc.ar(
-		SinOsc.ar(
-			SinOsc.ar(1/5, 0, 2, 3),
+	SinOsc.ar( //Carrier signal.
+		SinOsc.ar( //Frequency modulation (440-880 Hz).
+			SinOsc.ar(1/5, 0, 2, 3), //Modulating the frequency at which the modulation occurs (1-5 times per second).
 			0.5pi,
 			220,
 			660),
@@ -493,7 +513,7 @@ add = mul + low limit
 	+
 	SinOsc.ar (freq * 25, 0, 1/25.squared)
 	*
-	0.1 //Total amplitude * 0.1
+	0.1 //Total amplitude * 0.1 (compensate addition of signals).
 }.scope
 )
 
@@ -511,9 +531,11 @@ add = mul + low limit
 
 
 //Square wave:
+//Filtered version (normally, for sound):
 { Pulse.ar(440, 0.5, 0.5) }.plot(2/440)
 { Pulse.ar(440, 0.5, 0.1) }.scope
 
+//Raw version (normally, for LFO):
 { LFPulse.ar(440, 0, 0.5, 0.5) }.plot(2/440)
 { LFPulse.ar(440, 0, 0.5, 0.1) }.scope
 
@@ -559,11 +581,17 @@ add = mul + low limit
 
 
 //Saw tooth wave:
+//Filtered version (normally, for sound):
 { Saw.ar(440, 0.1, 0) }.plot(2/440)
 { Saw.ar(440, 0.1, 0) }.scope
 
+//Raw version (normally, for LFO):
 { LFSaw.ar(440, 0, 0.1, 0) }.plot(2/440)
 { LFSaw.ar(440, 0, 0.1, 0) }.scope
+
+//Comparing Pulse and LFPulse: aliasing:
+{ Saw.ar(MouseX.kr(20, 22050, \exponential).poll, 0.5, 0.125) }.scope
+{ LFSaw.ar(MouseX.kr(20, 22050, \exponential).poll, 0.5, 0.125) }.scope
 
 //Building a saw tooth wave out of sine waves:
 (
@@ -600,6 +628,23 @@ add = mul + low limit
 	SinOsc.ar (freq * 15, 0, 1/15)
 	*
 	0.1 //Total amplitude * 0.1.
+}.scope
+)
+
+//We would need approx. 50 sine waves to obtain something close to Saw:
+(
+{ var freq = 440, signal;
+
+	signal = SinOsc.ar(freq * 1, 0, 1/1); //Fundamental frequency (overtone 1).
+
+	//Repeating 49 times the addition of sine waves (+ the fundamental freq = 50 sine waves):
+	49.do({ |i| //Argument "i" = number of iteration (from 0 to 48
+
+		signal = signal + SinOsc.ar(freq * (i + 2), 0, 1/(i + 2)); //i + 2 to avoid the overtone 0 and the overtone 1 (already the fundamental freq).
+	});
+
+	signal * 0.05 //Balancing the total amplitude.
+
 }.scope
 )
 
@@ -1278,6 +1323,10 @@ ring4: //(a * a * b) - (a * b * b)
 { SinOsc.ar(7000, 0, 0.2) ring4: SinOsc.ar(LFDNoise3.ar(3, 125, 7000), 0, 0.3 !2) }.play
 
 //Frequency modulation (FM):
+//More info in these two tutorials:
+//https://www.youtube.com/watch?v=UoXMUQIqFk4&list=PLPYzvS8A_rTaNDweXe6PX4CXSGq4iEWYC&index=22
+//https://www.youtube.com/watch?v=dLMSR2Kjq6Y&list=PLPYzvS8A_rTaNDweXe6PX4CXSGq4iEWYC&index=23
+
 { SinOsc.ar(500 + SinOsc.ar(1)) * 0.1 !2 }.scope
 { SinOsc.ar(500 + SinOsc.ar(1, 0, 20)) * 0.1 !2 }.scope
 { SinOsc.ar(500 + SinOsc.ar(8, 0, 400)) * 0.1 !2 }.scope
