@@ -1,10 +1,14 @@
+//SESSION 4 - EXERCISE WITH SOLUTION
+
+/////////////////////////////////////////////////
+
 /*
 Combine the use of patterns within a Routine (patterns generate values / Routine asks for values to patterns and creates synths) following these instructions:
 - Use the following SynthDef \sinePerc.
 - Use the following array of MIDI notes: [ 7, 7, 9, 7, 9, 11, 9, 7, 6, 4, 2 ] + 72.
 - Use the following array of durations: [1, 1, 1/8, 1/8, 1/2, 1/4, 1/2, 1/4, 1/4, 1/2, 1.5]
 - (The combination of notes and durations sounds like the theme of Bach's Goldberg Variations).
-- ALGORITHMIC TASK: Each repetition of the complete melody should be played at a different tempo: for this mulriply all durations by a random value.
+- ALGORITHMIC TASK: Each repetition of the complete melody should be played at a different tempo (for this multiply all durations by a random value).
 */
 
 //Given SynthDef:
@@ -28,6 +32,22 @@ SynthDef(
 }).add
 )
 
+//Routine template:
+(
+Routine({
+
+	inf.do({
+
+		Synth(\sinePerc);
+
+		1.wait
+	})
+
+}).play
+)
+
+
+/////////////////////////////////////////////////
 //Possible solution:
 (
 var pitches, durations;
@@ -38,7 +58,7 @@ durations = Pseq([1, 1, 1/8, 1/8, 1/2, 1/4, 1/2, 1/4, 1/4, 1/2, 1.5], inf).asStr
 
 Routine({ var nextDur, newTempo = 1; //I need a default value because of the i != 0 condition.
 
-	inf.do({ |i|;
+	inf.do({ |i|
 
 		if ((i % 11 == 0).and(i != 0), { newTempo = rrand(0.5, 2.5) }); //First melody at original "tempo". The use of the module is the key of this exercise to choose a new tempo product every 11 pitches (complete melody cycle).
 
