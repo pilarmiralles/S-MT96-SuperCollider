@@ -1,18 +1,56 @@
 b//Sound synthesis basics - Presentation (beginner group)
 /////////////////////////////////////////////////////////////////////
 
+/*
+Some usefult links:
+https://doc.sccode.org/Help.html (online SC guide)
+https://supercollider.github.io/tutorials/
+https://doc.sccode.org/Help.html
+https://scsynth.org/
+https://github.com/madskjeldgaard/awesome-supercollider
+http://sccode.org/
+https://github.com/supercollider/supercollider/wiki/Code-style-guidelines (these four about code style)
+https://blog.alexdevero.com/6-simple-tips-writing-clean-code/
+https://medium.com/coding-skills/clean-code-101-meaningful-names-and-functions-bf450456d90c
+https://scsynth.org/t/some-notes-on-writing-supercollider-code-for-non-programmers/1940
+*/
+
+//SC is an open source: anyone can contribute with the creation of new tools, extensions, etc., and with the enhancement of the existing ones, and there is an active and helpful community of users and contributors.
+//SC is free to use, light in the computer, easy to get some sound out of it.
+//Overwhelming amount of tools and resources, and different ways of doing the same thing: stick to the basics and, after adquiring a solid ground, experiment, seek your own way to attain your objectives.
+
+//OOP
+//SC is an OOP (object-oriented programming language), a programming paradigm based on the concept of "object". In SC there are basically two kinds of objects: classes and methods. Methods are instructions and classes hold information about how to respond to those instructions. Classes are organized within a hierarchy defining their properties. In the class tree, we can see that all classes come from the main branch called "Object".
+//Class tree: https://doc.sccode.org/Overviews/ClassTree.html
+CombC //Open the Help file (ctrl + D) and observe how, for instance, CombC comes from CombN --> PureUGen --> UGen --> AbstractFunction --> Object.
+
+/*
+Architecture of SC: https://doc.sccode.org/Guides/ClientVsServer.html
+SC application is based on two basic, autonomous components (two different programs): the server and the client:
+- The IDE (Integrated Development Environment): is the environment we see here, the text editor, the menu bar, the postwindow, the status bar, etc. https://doc.sccode.org/Guides/SCIde.html
+- The language: features a specific syntax, that is to say, a set of rules and symbols to express something in that language.
+- The interpreter: if the language is the letter, the interpreter is the mailman. The language and interpreter form the client (sclang). The interpreter translates the language into OSC messages for the server.
+- The audio server (scsynth): receives OSC messages from a client.
+Because of client and server are two different and independent programs, the audio server can receive OSC messages from a client different than sclang (the so-called external applications in the third diagram of the link). Nevertheless, sclang is dessigned to provide with the expressive power of SC language.
+*/
+
+
 //DATA TYPES
+//Data types are different ways of representing and interpreting data (information). They are usually represented as Literals, that is to say, they have a distinctive representation: https://doc.sccode.org/Reference/Literals.html
 
-//Limits of integer numbers:
-2 ** 31
-2147483647 + 1 //Crossing the limit
+//Numbers: can be integers or floating-point numbers (floats):
+//Limits of integer numbers: 32 bits:
+2 ** 31 //Representation limit (already expressed as a float).
+2147483647 + 1 //Crossing the limit (folds into the nevative values).
 
-//Limits of float representation:
-(-1, -0.8..1)
-(0, 0.2..1)
+//Limits of float representation: 64 bits (but limitation regarding the infinite numbers in between two numbers):
+(-1, -0.8..1) //0.0 does not exist in this list of numbers, but some number extremely close to it.
+(0, 0.2..1) //0.0 does appear in this list nevertheless.
 
 (0.1 !10).sum == 1.0 //"False".
 (0.1 + 0.1 + 0.1 + 0.1 + 0.1 + 0.1 + 0.1 + 0.1 + 0.1 + 0.1) //But equal to 1.0 in fact.
+
+//Additional discussion: https://www.sounddevices.com/32-bit-float-files-explained/
 
 //Other floats:
 1.2e4
@@ -21,39 +59,45 @@ pi
 0.5pi //pi constant.
 inf //Infinite.
 
-//Strings:
+//Strings: strings are arrays of characters between douple quotes:
 "string"
-"string".scramble
+"string".scramble //We can apply methods to strings.
 
-//Symbols:
+//Symbols: a symbol points to something, that is to say, it represents something. They can be written in two ways:
 \symbol
 'symbol'
 
 //Equality and Identity in SuperCollider (symbols VS strings):
+//Symbols containing the same characters represent the same object:
 \abc == \abc //True
 \abc === \abc //True
 
+//Strings containing the same characters do not represent the same object:
 "abc" == "abc" //True
 "abc" === "abc" //False
+
+//Notice that a single "=" is only used to assign data to variables and arguments.
 
 //Other special values:
 true
 false
 nil //(empty)
 
-//Examples of variables:
+//Identifiers: they can be variables or methods:
+//Examples of variables: variables are data containers.
 var hello, filter_func
 
-//Examples of methods:
+//Examples of methods: methods send messages to objects called "receivers". There are two kinds of methods: class methods are sent to classes to create objects; instance methods are applied to what a class has created to somehow modify it:
 .play, .midicps, .round
 
-//Classes:
+//Classes: classes create and modify objects when receiving messages sent by methods and defined by their arguments.
 Server
 SinOsc
 HPF
 
 
 //MATHEMATICAL OPERATIONS
+//Unary operations are applied to single numbers (normally, using methods); binary operations are performed between two or more numbers.
 
 //Basic calculations:
 1 + 1 //Addition
@@ -111,39 +155,42 @@ string = "hello";
 
 { SinOsc.ar(440, 0, 0.1) }.play; //Curly brackets: functions.
 
+//Avoid spaces between before or after [] or (), but allow spaces after { and before }.
 
 /////////////////////////////////////////////////////////////////////////////////
 
 //VARIABLES
+//Variables are data containers
 
-//Non-declared (global):
-a = 1
-a + 1
+//Non-declared (global): variables a-z are non-declared variables or global variables, which can be used wherever in the code (excluding "s", which contains the audio server):
+a = 1 //1 is assigned to "a", thus "a" represent a 1.
+a + 1 //2
 
-this.dump
+this.dump //Shows the "instance of the interpreter", which includes all global variables and their current values.
 
-//Declared:
+//Declared variables: they can only be called within the portion of code within which they are declared:
 (
 var value1, value2, power;
 
-value1 = 2;
+value1 = 2; //If we try to evaluate this single line, SC will tell us that the variable "value1" is not declared.
 value2 = 16;
 power = value1 ** value2
 )
 
-//Non-declared with descriptive name:
+//Non-declared with descriptive name: they can be used anywhere in the code just like a global variable:
 ~value1
 
 
 //FUNCTIONS
+//A Function is an expression which defines operations to be performed when it is sent the .value message and a list of arguments in the order they were declared within the function (arguments are the values we can pass to the function as "inputs"). They are written between curly brackets.
 
-//Useless example:
+//Useless example (no arguments = fixed result):
 a = { 1 + 1 }
 a.value
 
-//Less useless example:
+//Less useless example: all instructions are interpreted in one shot, one after another in order, and only the last line's result is printed in the postwindow:
 (
-f = { |value1 = 1, value2 = 5, deviation = 0.9| //Default values.
+f = { |value1 = 1, value2 = 5, deviation = 0.9| //List of argument and their default values (to be replaced by those sent from .value).
 	var result;
 
 	result = value1 + value2;
@@ -151,7 +198,7 @@ f = { |value1 = 1, value2 = 5, deviation = 0.9| //Default values.
 }
 )
 
-f.value(2, 3, 0.09)
+f.value(2, 3, 0.09) //Evaluating the function and sending values to its arguments.
 f.value(deviation: 0.99) //Keyword assignment.
 
 //Area of a trapezoid A = ((a + b) / 2) * h:
@@ -159,51 +206,54 @@ f.value(deviation: 0.99) //Keyword assignment.
 { |shortBase = 2, longBase = 3, height = 2|
 	var area;
 
-	area = shortBase + longBase / 2;
+	area = shortBase + longBase / 2; //Remember that there is no hierarchy regarding the operations in SC: they will be performed from left to right.
 	area = area * height
 
-}.value(1, 2, 2)
+}.value(1, 2, 2) //Method .value applied to the block of code directly because there is no global variable.
 )
 
 
 //METHODS
+//Methods define the operations that classes can perform when receiving them. A message is the request for an object to perform an operation (is the request itself, the operation and the act of assigning it to an object), and a method is the physical form of the message (the text we write, representing the message, and its arguments, which describe the opertions necessary when sending a message to a particular class):
 
+//Silly example of how classes and methods work together:
 //Imaginary classes:
 Sandwich
 Ham
 
 //Imaginary methods:
 Sandwich
-* prepare //Class method (creates the sandwich)
-hitUp //Instance methods (modify the sandwich)
+* prepare //Class method (creates the sandwich), indicated with an asterisk.
+hitUp //Instance methods (modify the sandwich).
 cut
 
 Ham
-* marinate
-fry
+* marinate //Class method (creates the ham).
+fry //Instance method (modify the ham).
 
 //Syntax object-message: class.method:
 Sandwich.prepare
 
-//Real example in SC:
-{ SinOsc.ar }.play
+//Real example in SC: a sine wave receives the method .ar, which makes it create an audio rate signal (class method), with a list of arguments defining the frequency, phase, and amplitude of that signal; then, the signal is placed into a function to which the method .play is applied in order to play the signal (instance method):
+{ SinOsc.ar(440, 0, 0.1, 0) }.play
 
 //Defining imaginary arguments:
 Sandwich{
 
-	*prepare{ arg extraIngredients = ['tomato', 'cheese'], //Class method.
-		bread = 'baguette', //Default values for its arguments.
-		meat = 'chicken';
-		...
-		...
+	//Class method:
+	*prepare{ //List of arguments and default values.
+		arg extraIngredients = ['tomato', 'cheese'], bread = 'baguette', meat = 'chicken';
 	}
 
-	hitUp{ arg temp = 50, time = 120; //Instance methods.
+	//Instance methods:
+	hitUp{ arg temp = 50, time = 120;
 	}
 
 	cut{ arg numPieces = 2;
 	}
 }
+
+SinOsc //Press ctrl + i (and double click on SinOsc in the list): source code of SinOsc (resembling out imaginary example).
 
 //Applying out imaginary methods to our imaginary classes:
 
@@ -215,7 +265,7 @@ a = Sandwich.prepare(
 	['pepper'],
 	'baguette',
 
-	Ham.marinate.fry(260) //First arg of the method is temp (for instance) --> Help doc should indicate what is the unit of temp.
+	Ham.marinate.fry(260) //First argument of the method .fry is temp (for instance) --> Help doc should indicate what is the unit of temp (just like in SinOsc.ar it is indicated that the unit of frequency is the Hz).
 )
 
 //Applying instance methods:
@@ -224,6 +274,7 @@ a = a.cut(4) //Arg of .cut is number of pieces.
 
 
 //COLLECTIONS: ARRAY
+//A collection is an object containing a group of objects: the elements (or items) of the collection. There are many types of collections, but Array is the most common one. A collection between square brackets is by default an Array. The elements of an array are separated by commas and they are assigned an integer called "index" which represent the position or order of the element within the array.
 
 //Homogeneous collection of integers:
 [1, 2, 3, 4, 5]
@@ -234,24 +285,25 @@ a = a.cut(4) //Arg of .cut is number of pieces.
 //An array assigned to a global variable:
 a = [1, 2, 3, 4, "hello", { SinOsc.ar(mul: 0.1) }]
 
+//We can acceed to each element using their index (the first element is always represented by index = 0):
 a[0] //= 1
 a[4] //= "hello"
 a[5].play //Applying the method .play to the function in index 5.
 
-//CLASS METHODS for arrays:
-//Array.fill:
+//CLASS METHODS for arrays: these class methods create arrays:
+//Array.fill: creates an array with a specific size by evaluating a function as many times as the size states:
 Array.fill(6, { rrand(0, 11) }) //Six random numbers from 0 to 11.
 
 Array.fill(6, { |i| i }) //Using the "index" argument: printing the index numbers (0 to 5).
 
 Array.fill(6, { |i| [i, rrand(0, 11)] }) //Array of six arrays containing the index number and a random number each.
 
-//Duplication (!n) is equivalent to Array.fill:
+//Duplication (!n) of a function is equivalent to Array.fill:
 ({ |i| [i, rrand(0, 11)] } !6) //equal to:
 
 Array.fill(6, { |i| [i, rrand(0, 11)] })
 
-//Array.series:
+//Array.series: creates an arithmetic series within an array: arguments are the size, the starting value and the step (a value added to each element of the series):
 Array.series(12, 0, 1) //Series from 0 to 11 with a step of 1.
 
 Array.series(24, 60, 0.5) //Series representing a scale of quarter tones within an octave from 60 MIDI (for instance, if applied to sound).
@@ -261,7 +313,7 @@ x = Array.series(50, 0, 5)
 x.plot(discrete: true) //Discontinuous points.
 x.plot(discrete: false) //Continuous line (although the content of the array is still a series of "points"), by default, no need to indicate.
 
-//Array.geom:
+//Array.geom: creates a geometric series within an array: arguments are the size, the starting value and the "grow" (a product by which each element of the series is multiplied):
 Array.geom(5, 220, 2) //Series of five octaves from 220 Hz, if applied to sound.
 
 //Visualizing arrays:
@@ -343,6 +395,7 @@ j[..3] //Taking indexes from the first one up to the fourth (including the fourt
 
 //UGENS: SINOSC
 //Unit Generators or UGens are classes that create or process signals:
+//https://doc.sccode.org/Guides/UGens-and-Synths.html (basic concepts UGen, Synth).
 UGen
 
 //First UGen: SinOsc, sine wave oscillator:
@@ -652,27 +705,29 @@ add = mul + low limit
 { SinOsc.ar(LFSaw.ar(1, 0, 400, 1000), 0, 0.1 !2) }.play
 
 
-//Low frequency noise generators:
-{ LFDNoise0.ar(440, 0.2, 0) }.play //Sound at audio rate.
-{ LFDNoise1.ar(440, 0.3, 0) }.play
-{ LFDNoise3.ar(880, 0.3, 0) }.play
+//Low frequency noise generators: three different interpolations (how it moves from one value to the next):
+//Sound at audio rate:
+{ LFDNoise0.ar(440, 0.2, 0) }.play //Step interpolation.
+{ LFDNoise1.ar(440, 0.3, 0) }.play //Linear interpolation.
+{ LFDNoise3.ar(880, 0.3, 0) }.play //Cubic interpolation.
 
+//Normally used for aperiodic low frequency modulations:
 { SinOsc.ar(LFDNoise0.ar(10, 500, 1000), 0, 0.2) }.play //Applied to a SinOsc's freq: no interpolation.
 { SinOsc.ar(LFDNoise1.ar(10, 500, 1000), 0, 0.3) }.play //Linear interpolation.
 { SinOsc.ar(LFDNoise3.ar(10, 500, 1000), 0, 0.3) }.play //Cubic interpolation.
 
-{ SinOsc.ar(LFDNoise3.ar(10, 12, 60).midicps, 0, LFDNoise3.ar(3, 0.5, 0).max(0)) }.play //Applied to two parameters and using the method .max
+{ SinOsc.ar(LFDNoise3.ar(10, 12, 60).midicps, 0, LFDNoise3.ar(3, 0.5, 0).max(0)) }.play //Applied to two parameters and using the method .max (usefult to create random gaps).
 
 { SinOsc.ar(5000, 0, LFDNoise0.ar(10, 0.3, 0.3)) }.play //Only amplitude modulation (constant freq).
 
 (
 { var times;
 
-	times = LFDNoise0.ar(1, 4.5, 5.5); //Modulation of an LFDNoise0's frequency with another LFDNoise0.
+	times = LFDNoise0.ar(1, 4.5, 5.5); //Modulation of an LFDNoise0's frequency with another LFDNoise0 (random value each second).
 
-	Mix(
+	Mix( //Five sine waves with different random frequencies mixed into a single channel (and then duplicated on both channels).
 		SinOsc.ar(
-			Array.fill(5, { LFDNoise0.ar(times, 220, 660) }),
+			Array.fill(5, { LFDNoise0.ar(times, 220, 660) }), //Random frequency value each 1 to 10 seconds.
 			0,
 			1/20) //Compensating the addition of signals.
 	) !2
@@ -680,22 +735,21 @@ add = mul + low limit
 )
 
 
-//Noise generators:
-FreqScope.new //Visualization.
+//Noise generators: normally used for generating sound (very useful for filtering as they contain all the spectrum or a wide part of it):
+FreqScope.new //Visualization of the spectrum.
 
-{ ClipNoise.ar(0.1) }.play
-{ WhiteNoise.ar(0.1) }.play
-{ PinkNoise.ar(0.1) }.play
-{ BrownNoise.ar(0.1) }.play
-{ GrayNoise.ar(0.1) }.play
+{ ClipNoise.ar(0.1) }.play //Brightest (chooses values from the extremes of the spectrum).
+{ WhiteNoise.ar(0.1) }.play //Bright (although all frequencies feature the same probability of been chosen).
+{ PinkNoise.ar(0.1) }.play //Perceived as "plain" noise, but in fact, spectrum falling 3dB per octave.
+{ BrownNoise.ar(0.1) }.play //Darkest because values chosen out of Brownian motion. Also spectrum falling 6dB per octave.
+{ GrayNoise.ar(0.1) }.play //Based on digital synthesis: flipping random values in the binary code.
 
-//Modulations with noise generators:
-
-{ SinOsc.ar(ClipNoise.ar(1980, 2000), 0, 0.1) }.play
+//Modulations with noise generators (although no longer low frequency modulations as the noise runs at 44100 Hz/s):
+{ SinOsc.ar(ClipNoise.ar(1980, 4000), 0, 0.1) }.play
 { SinOsc.ar(WhiteNoise.ar(1980, 2000), 0, 0.1) }.play
 { SinOsc.ar(PinkNoise.ar(7620, 8000), 0, 0.1) }.play
 { SinOsc.ar(PinkNoise.ar(54.5, 76.5).midicps, 0, 0.1) }.play
-{ SinOsc.ar(BrownNoise.ar(1980, 2000), 0, 0.1) }.play
+{ SinOsc.ar(BrownNoise.ar(1980, 4000), 0, 0.1) }.play
 { SinOsc.ar(BrownNoise.ar(54.5, 76.5).midicps, 0, 0.1) }.play
 
 //Duplicator when working with randomness:
@@ -705,19 +759,26 @@ FreqScope.new //Visualization.
 { Array.fill(2, { BrownNoise.ar(0.1) }) }.play //Yet another example of the former function.
 
 
-//Impulse generators:
-{ Impulse.ar(1, 0, 0.5) }.play
-{ Dust.ar(10, 0.5) }.play
+//Impulse generators (commonly used as triggers):
+{ Impulse.ar(1, 0, 0.5) }.play //Single impulse (contains all freq spectrum) = click.
+{ Dust.ar(10, 0.5) }.play //Random impulse generator (density = average of impulses per second).
 
-{ SinOsc.ar(440, 0, ToggleFF.ar(Dust.ar(3))) * 0.1 }.play
+//For example, ToggleFF acts as a switch, but needs a trigger: Dust can act as its trigger (applied to the amplitude of the SinOsc):
+{ SinOsc.ar(440, 0, ToggleFF.ar(Dust.ar(3))) * 0.1 }.play //Morse code :)
 
 
-//Butterworth filters:
+//Butterworth filters (2nd order = -12dB per octave):
+//https://en.wikipedia.org/wiki/Butterworth_filter (about Butterworth filters).
+//https://depts.washington.edu/dxscdoc/Help/Tutorials/Mark_Polishook_tutorial/14_Subtractive_synthesis.html (some info about filters in this link about subtractive synthesis).
+
+//High-pass filter:
 { HPF.ar(PinkNoise.ar, 1000, 0.1) }.play //Filtering a PinkNoise.
 { HPF.ar(PinkNoise.ar, LFTri.ar(1/10, 0, 8000, 8020), 0.1) }.play //LFTri modulating the cut-off freq.
 
+//Low-pass filter:
 { LPF.ar(PinkNoise.ar, LFTri.ar(1, 0, 54.5, 76.5).midicps, 0.1) }.play //LFTri modulating the cut-off freq.
 
+//Band-pass filter (RQ value, the lower, the narrower the pass band):
 { BPF.ar(PinkNoise.ar, 1000, 0.01, 3) }.play //Try other RQ (0.5-0.005): compensate the amplitude!
 (
 {
@@ -730,19 +791,22 @@ FreqScope.new //Visualization.
 }.play
 )
 
+//Band-reject filter:
 (
 {
 	BRF.ar(
 		PinkNoise.ar,
 		LFTri.ar(1/10, 0, 54.5, 76.5).midicps,
-		1,
+		1, //If the RQ is too small, the rejected band will no longer be noticeable.
 		0.3
 	)
 }.play
 )
 
+//Resonant high-pass filter:
 { RHPF.ar(PinkNoise.ar, 1000, 0.01, 0.2) }.play
 
+//Resonz filter (bwr = RQ):
 (
 {
 	Resonz.ar(
@@ -754,6 +818,7 @@ FreqScope.new //Visualization.
 }.play
 )
 
+//Ringz filter (decay time):
 { Ringz.ar(Impulse.ar(1), 440, 0.5, 0.1) }.play
 { Ringz.ar(WhiteNoise.ar(1), 440, 1, 0.001) }.play
 
@@ -763,7 +828,8 @@ FreqScope.new //Visualization.
 //MULTICHANNEL EXPANSION, FILTER BANK AND KLANK
 
 //Multichannel expansion:
-s.meter
+//In SC channels are arrays: a single signal will be played by default through channel 0, whereas an array of two signals will be played through channels 0 and 1. Therefore, a stereo signal is an array of two elements (signals).
+s.meter //Visualization of the default channels reserved for output and input signals.
 
 { SinOsc.ar(440, 0, 0.1) }.scope //Coming out through left channel (index 0).
 { SinOsc.ar(440, 0, 0.1 !2) }.scope //Coming out through L-R channels (indexes 0-1).
@@ -777,16 +843,16 @@ s.meter
 }.scope
 )
 
-{ SinOsc.ar([440, 441], 0, 0.2) }.play
+{ SinOsc.ar([440, 441], 0, 0.2) }.play //Equivalent code: an array of two elements in the argument of a signal creates as many instances of that signal as elements present in the array.
 
-//Using Mix:
+//Using Mix: mixing an array of signals into a single channel:
 (
 {
 	Mix(
 		SinOsc.ar(
-			Array.fill(100, { exprand(30, 8000) }),
+			Array.fill(100, { exprand(30, 8000) }), //An array of 100 frequencies will bring about 100 sine oscillators.
 			0,
-			1/200
+			1/200 //Compensating the amplitude: total amplitude of 0.5.
 		)
 	)
 }.play
@@ -794,7 +860,10 @@ s.meter
 
 { Mix(SinOsc.ar({ exprand(30, 8000) } !100, 0, 1/200)) }.scope //Equivalent using the duplicator.
 
-//Deconstructing multichannel expansion:
+//How Mix works:
+a + b + c = [a, b, c].sum = Mix([a, b, c])
+
+//Deconstructing multichannel expansion (useful practice to understand how signals are expanded and distributed among channels):
 { RLPF.ar(Saw.ar([100, 250], 0.05), LFDNoise3.ar(1, 1000, 1030), 0.005) }.play
 
 (
@@ -818,7 +887,7 @@ s.meter
 }.play
 )
 
-//Another example:
+//Another example: bigger array gives number of instances, shorter array wraps:
 { Pulse.ar([400, 500, 600], [0.5, 0.1], 0.1) }.play
 
 (
@@ -832,6 +901,7 @@ s.meter
 )
 
 //Stereo using Mix:
+//Two levels of arrays of signals (and no more: in Help file "Multichannel Expansion" --> "Reducing channel expansion with Mix": "You cannot use Mix on arrays of arrays of arrays").
 (
 {
 	Mix(
@@ -843,25 +913,28 @@ s.meter
 }.scope
 )
 
+//Using Pan2: as Mix is a mono signal, we can apply Pan2 to it:
 (
 {
 	Pan2.ar(
 		Mix(SinOsc.ar({ exprand(30, 8000) } !100, 0, 1/200)),
-		SinOsc.ar(1/2, 0, 1)
+		SinOsc.ar(1/2, 0, 1) //Low freq modulation of the position argument.
 	)
 }.play
 )
 
+//Using the duplicator:
 { Mix(SinOsc.ar({ exprand(30, 8000) } !100, 0, 1/200)) !2 }.play //Mono-duplicated (same frequencies on both sides).
 { { Mix(SinOsc.ar({ exprand(30, 8000) } !100, 0, 1/200)) } !2 }.play //Duplicated function (different frequencies on each side, richer sound).
 
-{ Splay.ar(SinOsc.ar({ exprand(30, 8000) } !100, 0, 1/200), 1, 2.5) }.play //Splay: distribution of a mono signal in the stereo field.
+//Using Splay: distribution of a mono signal in the stereo field (instead of 100 different freqs on each side, the 100 freqs will be distributed amond both sides of the stereo):
+{ Splay.ar(SinOsc.ar({ exprand(30, 8000) } !100, 0, 1/200), 1, 2.5) }.play //Second argument is "spread" (when = 0, all signals go to the center, when = 1, the distribute among the -1 to 1 stereo field, and everything in between), and third argument is "level" (for amplitude compensation).
 
 //Comparing these two codes:
 (
 {
 	Mix.ar(
-		Array.fill(18, { Ringz.ar(WhiteNoise.ar(0.0001), exprand(100, 3000)) })
+		Array.fill(18, { Ringz.ar(WhiteNoise.ar(0.0001), exprand(100, 3000)) }) //There will be 18 different white noises (if put into a variable, equivalent to next code).
 	) !2
 }.play
 )
@@ -870,7 +943,7 @@ s.meter
 {
 	Mix.ar(
 		Ringz.ar(
-			WhiteNoise.ar(0.0001),
+			WhiteNoise.ar(0.0001), //A unique noise is shared among the 18 filters.
 			Array.fill(18, { exprand(100, 3000) })
 		)
 	) !2
@@ -881,13 +954,13 @@ s.meter
 (
 { var freqDeviation;
 
-	freqDeviation = LFNoise2.ar(0.05, 0.2, 1);
+	freqDeviation = LFNoise2.ar(0.05, 0.2, 1); //A very slow frequency deviation (over 20 seconds).
 
 	Mix(
 		BPF.ar(
 			BrownNoise.ar,
 			f = Array.geom(5, 440, 3/2) * freqDeviation,
-			0.05/f,
+			0.05/f, //The higher the frequency, the smaller the RQ value.
 			[24, 30].dbamp
 		)
 	)
@@ -900,9 +973,10 @@ s.meter
 	freqDeviation = LFNoise2.ar(0.05, 0.2, 1);
 
 	noise = BrownNoise.ar;
-	freqs = Array.geom(5, 440, 3/2) * freqDeviation;
-	amps = [24, 30].dbamp;
+	freqs = Array.geom(5, 440, 3/2) * freqDeviation; //Biggest array brings about number of instances.
+	amps = [24, 30].dbamp; //Smaller arrays wrap.
 
+	//Obtaining each value through the indexes of each array:
 	Mix.ar(
 		[
 			BPF.ar(noise, freqs[0], 0.05/freqs[0], amps[0]),
@@ -915,13 +989,13 @@ s.meter
 }.play
 )
 
-//Filter banks:
+//Filter banks: stacks of filters at a specific intervalic distance (based on overtones rations or equal intervalic ratios):
 (
 {
 	Mix(
 		BPF.ar(
 			PinkNoise.ar,
-			Array.geom(16, 30, 3/2), //Pitagoric fifths (perfect fifths).
+			Array.geom(16, 30, 3/2), //Pitagoric fifths (or natural fifths). If inverting the ratio (2/3), downward series (beware the starting frequency).
 			0.001,
 			5
 		)
@@ -934,7 +1008,7 @@ s.meter
 	Mix(
 		BPF.ar(
 			PinkNoise.ar,
-			Array.geom(16, 30, 7.midiratio), //Tempered fifths (equal temperament).
+			Array.geom(16, 30, 7.midiratio), //Tempered fifths (equal temperament), using semitones.midiratio.
 			0.001,
 			5
 		)
@@ -958,7 +1032,8 @@ s.meter
 (
 { var freqs;
 
-	freqs = Array.geom(8, 30, 2) //Octaves
+	//Concatenation of two arrays (all values put into a single array):
+	freqs = Array.geom(8, 30, 2) //Octaves.
 	++
 	Array.geom(16, 30, 1.5); //Fifths (3/2 = 1.5).
 
@@ -978,7 +1053,7 @@ s.meter
 
 	freqs = Array.geom(10, 30, 2)
 	*
-	Array.fill(10, { |i| ((i + 1 / 10) * 0.5).midiratio }); //Frequency deviation.
+	Array.fill(10, { |i| ((i + 1 / 10) * 0.5).midiratio }); //Frequency deviation: from 0.05.midiratio (to the fundamental freq) up to 0.5.midiratio of deviation (to the last frequency), which is equal to a quarter tone (change the * 0.5 to * 0.1 or * 1 to change the level of deviation.
 
 	amps = Array.geom (10, 1, 0.96); //Amplitude deviation.
 
@@ -986,29 +1061,36 @@ s.meter
 		BPF.ar(
 			PinkNoise.ar,
 			freqs,
-			0.01,
+			0.001,
 			amps
 		)
 	) !2
 }.play
 )
 
-//Klank filter:
+//Klank filter: a bank a fixed-frequency resonators:
+
+//Arguments:
+//specificationsArrayRef: see Help file "Multichannel expansion" --> "Protecting arrays against expansion" (avoids that the argument is interpreted as an array of arrays):
 `[
 	Array of freqs,
 	Array of amps,
 	Array of decay times
 ]
+//input: usually an Impulse, Dust or any noise generator.
+//freqscale: scale factor multiplied by all frequencies (as they are fixed, they can be "transposed" using this argument).
 
+//Examples:
 (
 {
 	Klank.ar(
 		`[
-			Array.fill(8, { exprand(150, 14000) }),
+			//Array.fill(8, { exprand(150, 14000) }), //Random freqs.
+			Array.geom(8, 80, 3/2), //Stack of fifths.
 			1,
-			Array.fill(8, { exprand(0.002, 0.02) }) * 32
+			Array.fill(8, { exprand(0.02, 0.2) }) * 32 //Sort of "lag".
 		],
-		{ PinkNoise.ar(0.01) } !2
+		{ PinkNoise.ar(0.005) } !2 * 0.5,
 	)
 }.play
 )
@@ -1017,9 +1099,9 @@ s.meter
 {
 	Klank.ar(
 		`[
-			[178.4, 570.3, 7384, 605, 356.9, 1150.6, 14768, 1210],
+			[178, 570, 7384, 605, 356, 1150, 14768, 1210],
 			1,
-			[0.002, 0.012, 0.018, 0.013, 0.002, 0.012, 0.018, 0.013]
+			[0.002, 0.012, 0.018, 0.013]
 		],
 		{ Dust.ar(3, 0.1) } !2
 	)
@@ -1030,9 +1112,9 @@ s.meter
 {
 	Klank.ar(
 		`[
-			[178.4, 570.3, 7384, 605, 356.9, 1150.6, 14768, 1210],
+			[178, 570, 7384, 605, 356, 1150, 14768, 1210],
 			1,
-			[0.002, 0.012, 0.018, 0.013, 0.002, 0.012, 0.018, 0.013] * 16
+			[0.002, 0.012, 0.018, 0.013] * 16 //Ading some greater decay.
 		],
 		{ Dust.ar(3, 0.1) } !2
 	)
@@ -1043,9 +1125,10 @@ s.meter
 /////////////////////////////////////////////////////////////////////////////////
 
 //ENVELOPES, TRIGGER AND GATE
+//Envelopes allow us to control parameters over time.
 
-//Basic syntax:
-EnvGen.ar(Env(levels, times, curve), gate)
+//Basic syntax: we need two classes to create an envelope: EnvGen is the Unit Generator of envelopes, and Env allows us to specify the characteristics of the envelope created by EnvGen:
+EnvGen.ar(Env(levels, times, curves), gate)
 
 //Linear curve:
 Env([0, 0.5, 0.1, 0.5, 0], 1, \linear).plot
@@ -1058,12 +1141,12 @@ Env([0, 0.5, 0.1, 0.5, 0], 1, \linear).plot
 
 	signal = SinOsc.ar;
 
-	signal * envGen
+	signal * envGen //In order to apply the envelope to the amplitude of a signal, we simply multiply the signal by the envelope.
 }.play
 )
 
 //Exponential curve:
-Env([0.001, 0.5, 0.1, 0.5, 0.001], [1, 4, 6, 2], \exponential).plot
+Env([0.001, 0.5, 0.1, 0.5, 0.001], [1, 4, 6, 2], \exponential).plot //An exponential curve cannot touch nor cross 0.
 
 (
 { var signal, env, envGen;
@@ -1078,7 +1161,7 @@ Env([0.001, 0.5, 0.1, 0.5, 0.001], [1, 4, 6, 2], \exponential).plot
 )
 
 //Step curve:
-Env([0, 0.5, 0.1, 0.5, 0], 1, \step).plot
+Env([0, 0.5, 0.1, 0.5, 0], 1, \step).plot //First level is "lost" as the first step is to directly jump to the second level.
 
 (
 { var signal, env, envGen;
@@ -1093,12 +1176,12 @@ Env([0, 0.5, 0.1, 0.5, 0], 1, \step).plot
 )
 
 //Curve defined by floats:
-Env([0, 0.5, 0.1, 0.5, 0], 1, 4).plot //Try -4 and [4, -4].
+Env([0, 0.5, 0.1, 0.5, 0], 1, 8).plot //0 = linear, 4 = sort of exponential, 8 = closer to step. Negative and positive values change the side from which the curve is "pulled".
 
 (
 { var signal, env, envGen;
 
-	env = Env([0, 0.5, 0.1, 0.5, 0], 1, [4, -4]);
+	env = Env([0, 0.5, 0.1, 0.5, 0], 1, [4, -4]); //Almost equivalent to \exponential, but we can touch or cross 0.
 	envGen = EnvGen.ar(env);
 
 	signal = SinOsc.ar;
@@ -1122,13 +1205,13 @@ Env([0, 0.5, 0.1, 0.5, 0], 1, [8, -4, \exponential, 0]).plot
 }.play
 )
 
-//Envelope of frequencies:
+//Envelope of frequencies: we can apply envelopes to parameters other than the amplitude, such as the frequency:
 (
 { var freq;
 
-	freq = EnvGen.ar(Env([39, 61, 50] + 12, 2, \linear)).midicps;
+	freq = EnvGen.ar(Env([39, 61, 50] + 12, 2, \linear)).midicps; //Linear distribution among midi values, then conversion to Hz (if the conversion happens before, then an exponential distribution would be more convenient.
 
-	SinOsc.ar(freq, 0, 0.5)
+	SinOsc.ar(freq, 0, 0.2) //The envelope is placed in the frequency argument of the signal.
 }.play
 )
 
@@ -1140,14 +1223,14 @@ Env([0, 0.5, 0.1, 0.5, 0], 1, [8, -4, \exponential, 0]).plot
 		Env(Array.fill(5, { rrand (60, 104) }),
 			Array.fill(4, { rrand(0.2, 1) }),
 			\linear
-		).circle
+		).circle //Not a real loop, as it jumps to the first value when the envelope is completed.
 	).midicps;
 
-	SinOsc.ar(freq, 0, 0.2)
+	SinOsc.ar(freq, 0, 0.1)
 }.play
 )
 
-//Last example: filter bank:
+//Last example: filter bank (envelope applied to the grow argument):
 (
 { var grow, freq;
 
@@ -1165,45 +1248,41 @@ Env([0, 0.5, 0.1, 0.5, 0], 1, [8, -4, \exponential, 0]).plot
 }.play
 )
 
-//Envelope methods:
+//Envelope methods: we can use different methods to create specific envelope shapes such as:
 Env.triangle(1, 0.3).plot
 { SinOsc.ar * EnvGen.ar(Env.triangle(1, 0.3).circle) }.play
 
 Env.sine(1, 0.3).plot
 { SinOsc.ar * EnvGen.ar(Env.sine(1, 0.3).circle) }.play
 
-Env.perc(0.01, 0.25, 0.3, -4).plot
-{ SinOsc.ar * EnvGen.ar(Env.perc(0.01, 0.25, 0.3, -4).circle) }.play
+Env.perc(0.01, 0.25, 0.3, -4).plot //The curve of a percussive envelope cannot be exponential because it will always touch 0.
+{ SinOsc.ar * EnvGen.ar(Env.perc(0.01, 0.5, 0.3, -4).circle) }.play
 
 
 //TRIGGER
+//The second argument of EnvGen is "gate". Gate is 1 by default as, as far as it is 1, it will trigger the envelope and hold it open. Though in order to use the argument gate as a real gate we need a different kind of envelope featuring a sustain section, gate can be used as a trigger for those envelopes without sustain in order to "reboot" the envelope at certain moments:
 (
 { var trigger, signal, env;
 
-	trigger = Impulse.ar(1); //Try with 2 and with Dust.
+	trigger = Impulse.ar(1); //Impulse will trigger the envelope 1 time per second (try with freq of 2 and with Dust).
 	signal = SinOsc.ar;
-	env = EnvGen.ar(Env.perc(0.01, 0.5, 0.3), trigger);
+	env = EnvGen.ar(Env.perc(0.01, 0.5, 0.3), trigger); //If the release of .perc is longer than the frequency of the impulse, we will never hear silence between the envelopes (try with release = 2).
 
 	signal * env
 }.play
 )
 
-//Randomness:
+//Randomness: every time it is triggered, the envelope will feature a different random value (of time, in this case):
 (
-{ var freq, trigger, times, signal;
+{ var freq, trigger, time, signal;
 
-	trigger = Impulse.ar(1/4);
-	times = [rrand(0.5, 3)];
+	trigger = Impulse.ar(1/4); //It does not matter if the envelope is completed: every four seconds, it is rebooted (if longer than 4 seconds, it is cut, and if shorter than 4 seconds, last value is sustained until next trigger).
+	time = [rrand(0.5, 3)]; //Random time chosen between 0.5 and 3 seconds. If the random choice was made directly into the expanded envelope, each envelope will feature a different time value.
 
+	//Array of five envelopes (each envelope features five random levels used as frequencies in the SinOsc), bringing about five sine oscillators.
 	freq = Array.fill(5, {
-		EnvGen.ar(Env(Array.fill(5, { exprand(60, 78).midicps }), times, \step), trigger)
+		EnvGen.ar(Env(Array.fill(5, { exprand(60, 78).midicps }), time, \step), trigger)
 	});
-
-	/*
-	freq = Array.fill(5, {
-	EnvGen.ar(Env(Array.fill(5, { exprand(60, 78).midicps }), [rrand(0.5, 3)], \step), trigger)
-	});
-	*/
 
 	signal = Mix.ar(
 		SinOsc.ar(
@@ -1213,54 +1292,57 @@ Env.perc(0.01, 0.25, 0.3, -4).plot
 		)
 	) !2;
 
-	signal * 0.5
+	signal * 0.1
 
 }.play
 )
 
 
 //GATE
+//In order to use the argument gate as a real gate, we need an envelope with sustain time (which will be sustained as far as gate = 1).
 
-//Basic syntax:
+//Basic syntax of method .adsr:
 Env.adsr(attackTime, decayTime, sustainLevel, releaseTime, peakLevel, curve)
 
-//Graphical representation:
-{ EnvGen.ar(Env.adsr, LFPulse.ar(1)) }.plot(2)
-{ EnvGen.ar(Env.asr, LFPulse.ar(1)) }.plot(2)
+//Graphical representation (takes some time to render):
+{ EnvGen.ar(Env.adsr, LFPulse.ar(1)) }.plot(1)
+{ EnvGen.ar(Env.asr, LFPulse.ar(1)) }.plot(1)
 
 //Applying gate:
 (
-a = { |gate = 1|
+a = { |gate = 1| //Default value.
 	var env;
 
-	env = EnvGen.ar(Env.adsr(0.1, 0.2, 0.5, 1, 0.6, -4), gate);
+	env = EnvGen.ar(Env.adsr(0.1, 0.2, 0.5, 1, 0.2, -4), gate);
 
 	SinOsc.ar !2 * env
 }.scope
 )
 
-a.set(\gate, 0)
-a.set(\gate, 1)
+//We can use the method .set to change the arguments of a signal running in the server:
+a.set(\gate, 0) //Gate = 0 triggers the release of the envelope.
+a.set(\gate, 1) //Gate = 1 triggers a new attack of the envelope.
+//Meanwhile, the envelope continues running in the server even when there is no sound (see node tree).
 
-//DoneAction = 2:
+//DoneAction = 2: see Help file of "EnvGen" --> In the information about the argument "doneAction", open the documentation about "Done": at the end of the document, there is a list of actions that can be implemented with doneAction: doneAction = 0 means "do nothing when the UGen is finished", doneAction = 2 means "free the enclosing synth" (so that the synth stops running in the server).
 (
 a = { |gate = 1|
 	var env;
 
-	env = EnvGen.ar(Env.adsr(0.1, 0.2, 0.5, 1, 0.6, -4), gate, doneAction: 2);
+	env = EnvGen.ar(Env.adsr(0.1, 0.2, 0.5, 1, 0.6, -4), gate, doneAction: 2); //Usually applied using keyword assignment as it is the last argument.
 
 	SinOsc.ar !2 * env * 0.5
 }.scope
 )
 
-a.set(\gate, 0)
-a.set(\gate, 1)
+a.set(\gate, 0) //When sending 0 to the gate, the envelope is finished and doneAction 2 frees the synth in the server (check the node tree).s
+a.set(\gate, 1) //Sending 1 to the gate again is no longer possible because the synth does not exist anymore.
 
 //Using LFPulse to open / close the gate periodically:
 (
 { var gate, signal, env;
 
-	gate = LFPulse.ar(0.5, 0, 0.5);
+	gate = LFPulse.ar(0.5, 0, 0.5); //LFPulse used as a switch to open and close the gate periodically every two seconds (the argument width allows us to shorten or lengthen the sustain within these two seconds (width = 0.5 means one second of attack, decay and sustain, and one second for release and possible silence).
 
 	signal = SinOsc.ar;
 
@@ -1270,51 +1352,56 @@ a.set(\gate, 1)
 }.play
 )
 
-//Extra: Line and XLine:
-{ SinOsc.ar(Line.ar(60, 84, 5).midicps, 0, 0.1 !2) }.play
-{ SinOsc.ar(XLine.ar(260, 1046, 5), 0, 0.1 !2) }.play
+//Extra: Line and XLine (similar result in these two examples):
+{ SinOsc.ar(Line.ar(60, 84, 2).midicps, 0, 0.1 !2) }.play //Line generator (if applied to frequency, works better with midi values, and converting afterwards).
+{ SinOsc.ar(XLine.ar(260, 1046, 2), 0, 0.1 !2) }.play //Exponential line generator (if applied to frequency, works better with Hz).
 
 
 /////////////////////////////////////////////////////////////////////////////////
 
-//MODULATIONS AND DECAY LINES
+//MODULATIONS (Ring, AM, FM) AND DECAY LINES
+//When modulating a signal at over 20 Hz of frequency, a new frequency spectrum will be created out of this periodicity:
 
-//Ring modulation:
-{ SinOsc.ar(207) !2 * SinOsc.ar(88) * 0.2 }.play
+//Ring modulation: it is a kind of amplitude modulation in which the fundamental frequency disappears. The modulation is performed by multiplying both signals or placing the modulating signal in the amplitude argument of the carrier signal:
+{ SinOsc.ar(440) !2 * SinOsc.ar(220) * 0.1}.play //We don't hear 440 nor 220, but the subtraction and addition of both (440 + 220 and 440 - 220).
 
-//Amplitude modulation (AM):
-{ SinOsc.ar(207) !2 * SinOsc.ar(88, 0, 0.5, 0.5) * 0.2 }.play
+//Amplitude modulation (AM): whereas the "depth" of the ring modulation was -1 to 1 (regarding the mul/add arguments of the modulating signal), the depth of the AM should be 0 to 1 in order to keep the fundamental frequency:
+{ SinOsc.ar(440) !2 * SinOsc.ar(220, 0, 0.5, 0.5) * 0.1 }.play //We hear (car + mod) + (car - mod) + car, as the mul/add arguments of the modulating signal are adjusted to the range 0-1.
 
 //Other examples:
-{ BrownNoise.ar(0.3) * SinOsc.ar(LFDNoise3.ar(1, 1000, 2000)) }.play
-{ BrownNoise.ar(0.2 !2) * SinOsc.ar(500) }.play //Try out 100, 50, 20, 10 for the SinOsc frequency.
-{ Saw.ar(200) * LFDNoise3.ar(200 !2, 0.2) }.play
+{ BrownNoise.ar(0.1 !2) * SinOsc.ar(5000) }.play //Try out 100, 50, 20, 10 for the SinOsc frequency to see what is happening.
+{ BrownNoise.ar(0.1) * SinOsc.ar(LFDNoise3.ar(1, 975, 1025)) }.play //Random value from 50 to 2000 (try with LFDNoise0?).
+{ Saw.ar(200) * LFDNoise3.ar(50 !2, 0.1) }.play
+{ Saw.ar(2000) * LFDNoise3.ar(200 !2, 0.1) }.play //A different combination of frequencies featured in the former line.
 
-//Ring modulation applied to an audio sample:
-b = Buffer.read(s, Platform.resourceDir +/+ "sounds/a11wlk01.wav")
+//Ring modulation applied to an audio sample (ugly default SC audio sample):
+b = Buffer.read(s, Platform.resourceDir +/+ "sounds/a11wlk01.wav") //Loading an audio file into a buffer (this will be studied later on during the course).
 
-{ PlayBuf.ar(b.numChannels, b.bufnum, loop: 1) * SinOsc.ar(MouseX.kr(20, 14000, \exponential).poll) !2 }.play
+//Applying ring modulation using a sine oscillator, and controlling the frequency using the horizontal movement of the mouse:
+{ PlayBuf.ar(b.numChannels, b.bufnum, loop: 1) * SinOsc.ar(MouseX.kr(20, 14000, \exponential).poll) !2 * 0.2 }.play
 
+//Same example, creating our own mix at the end:
 (
 { var signal, mod;
 
 	signal = PlayBuf.ar(b.numChannels, b.bufnum, loop: 1);
 
 	mod = SinOsc.ar(MouseX.kr(20, 14000, \exponential).poll) !2;
-	(signal + (signal * mod * 0.5))
+	(signal + (signal * mod * 0.5) * 0.2) //car + (car * mod * 0.5) * masterVolume.
 
 }.play
 )
 
-//Ring modulation methods:
+//Ring modulation methods: these methods represent operations between two signals:
 ring1: //(a * b) + a
 ring2: //(a * b) + a + b
 ring3: //a * a * b
 ring4: //(a * a * b) - (a * b * b)
 
-{ SinOsc.ar(207) ring1: SinOsc.ar(88) !2 * 0.1 }.play
+//Examples:
+{ SinOsc.ar(440) ring1: SinOsc.ar(220) !2 * 0.1 }.play //Equivalent to our first example of AM.
 
-{ SinOsc.ar(207) ring2: SinOsc.ar(88) !2 * 0.1 }.play
+{ SinOsc.ar(440) ring2: SinOsc.ar(220) !2 * 0.1 }.play
 
 { BrownNoise.ar(0.5) ring3: SinOsc.ar(LFDNoise3.ar(1, 1500, 2000), 0, 0.3 !2) }.play
 
@@ -1322,27 +1409,32 @@ ring4: //(a * a * b) - (a * b * b)
 
 { SinOsc.ar(7000, 0, 0.2) ring4: SinOsc.ar(LFDNoise3.ar(3, 125, 7000), 0, 0.3 !2) }.play
 
-//Frequency modulation (FM):
+//Frequency modulation (FM): consists of adding a signal to the frequency of another signal.
 //More info in these two tutorials:
 //https://www.youtube.com/watch?v=UoXMUQIqFk4&list=PLPYzvS8A_rTaNDweXe6PX4CXSGq4iEWYC&index=22
 //https://www.youtube.com/watch?v=dLMSR2Kjq6Y&list=PLPYzvS8A_rTaNDweXe6PX4CXSGq4iEWYC&index=23
 
-{ SinOsc.ar(500 + SinOsc.ar(1)) * 0.1 !2 }.scope
-{ SinOsc.ar(500 + SinOsc.ar(1, 0, 20)) * 0.1 !2 }.scope
-{ SinOsc.ar(500 + SinOsc.ar(8, 0, 400)) * 0.1 !2 }.scope
-{ SinOsc.ar(500 + SinOsc.ar(22, 0, 400)) * 0.1 !2 }.scope //Audio rate limit.
-{ SinOsc.ar(500 + SinOsc.ar(80, 0, 400)) * 0.1 !2 }.scope
+{ SinOsc.ar(500 + SinOsc.ar(1)) * 0.1 !2 }.scope //No perceptible difference, but slight movement from left to right in the graph, meaning that the carrier signal is oscillating (in fact from 499 to 500 Hz every second).
+{ SinOsc.ar(500 + SinOsc.ar(1, 0, 20)) * 0.1 !2 }.scope //Oscillation between 480 and 520 Hz every second (mul of modulating signal = range of freq modulation above and below the carrier's frequency).
+{ SinOsc.ar(500 + SinOsc.ar(8, 0, 400)) * 0.1 !2 }.scope //Oscillation 8 times per second, between 100 and 900 Hz.
+{ SinOsc.ar(500 + SinOsc.ar(22, 0, 400)) * 0.1 !2 }.scope //Crossing the 20 Hz limit = new frequency spectrum.
+{ SinOsc.ar(500 + SinOsc.ar(80, 0, 400)) * 0.1 !2 }.scope //Fully new spectrum.
 
-{ SinOsc.ar(MouseY.kr(500, 5000, 1).poll + SinOsc.ar(MouseX.kr(1, 2000, 1).poll, mul: LFNoise0.kr(8).range(400, 4500))) * 0.1 !2 }.scope
+//Example from first linked tutorial (to show a bunch of possible combinations of values): with MouseY, we change the carrier's freq (200-5000 Hz); with MouseX, we change the modulating's freq (1-2000 Hz); lastly, the modulating's mul, which is the range of frequency modulation, is controlled by a LFNoise0, which produces 8 random values per second.
+{ SinOsc.ar(MouseY.kr(500, 5000, 1).poll + SinOsc.ar(MouseX.kr(1, 2000, 1).poll, mul: LFNoise0.kr(8).range(400, 4500))) * 0.1 !2 }.scope //Because of its ranges, this code could produce negative frequencies: negative frequencies mean we're asking an oscillator to produce its periodic shape in reverse. This is not a problem in here but I don't know if some other UGens may respong in unexpected ways to negative frequency values, so... maybe avoid them.
 
 //Decay lines:
-{ BrownNoise.ar !2 * Decay.ar(Impulse.ar(0.5), 1, 0.2) }.play
+//A decay line generates an exponential envelope with a certain duration triggered by impulses. Applied to certain sounds, it allows us to enhance the attack of those sounds:
+{ BrownNoise.ar !2 * Decay.ar(Impulse.ar(0.5), 1, 0.2) }.play //Applied as an amplitude envelope for the BrownNoise.
 
+//Last example: enhancing attacks:
 (
 { var impulse;
 
+	//The impulse acts as input of the filter and as trigger of the decay:
 	impulse = Impulse.ar(0.5);
 
+	//Three Ringz filters are created with a different frequency and decay time each, and mixed into a single channel:
 	{ Mix(
 		Ringz.ar(
 			impulse,
@@ -1352,8 +1444,9 @@ ring4: //(a * a * b) - (a * b * b)
 		)
 	)
 
-	ring1:
+	ring1: //ring: multiplied both signals and adds the filter to the mix.
 
+	//Thanks to the common trigger, the WhiteNoise with the Decay envelope is applied to the attack of each filtered Impulse.
 	WhiteNoise.ar(Decay.ar(impulse, 0.04))
 	} !2 * 0.2
 
