@@ -235,7 +235,7 @@ fry //Instance method (modify the ham).
 //Syntax object-message: receiver.method(arguments):
 Sandwich.prepare
 
-//Real example in SC: a sine wave receives the method .ar, which makes it create an audio rate signal (class method), with a list of arguments defining the frequency, phase, and amplitude of that signal; then, the signal is placed into a function to which the method .play is applied in order to play the signal (instance method):
+//Real example in SC: a sine wave receives the method .ar, which makes it create an audio rate signal (class method), with a list of arguments defining the frequency, phase, and amplitude of that signal; then, the signal is placed into a function to which the method .play is applied in order to play the signal (instance method). When playing the signal, we can see in the postwindow that a synth, a signal that actually runs in the audio server (one instance of a synth definition, data about UGens and how they are interconnected, but this does not matter right now) has been created:
 { SinOsc.ar(440, 0, 0.1, 0) }.play
 
 //Defining imaginary arguments:
