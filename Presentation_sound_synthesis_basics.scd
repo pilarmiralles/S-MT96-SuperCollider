@@ -15,28 +15,28 @@ https://medium.com/coding-skills/clean-code-101-meaningful-names-and-functions-b
 https://scsynth.org/t/some-notes-on-writing-supercollider-code-for-non-programmers/1940
 */
 
-//SC is an open source: anyone can contribute with the creation of new tools, extensions, etc., and with the enhancement of the existing ones, and there is an active and helpful community of users and contributors.
+//SC is an open source: anyone can contribute with the creation of new tools, extensions, etc., and with the enhancement of the existing ones, and there is an active and helpful community of users and contributors (https://supercollider.github.io/#community).
 //SC is free to use, light in the computer, easy to get some sound out of it.
-//Overwhelming amount of tools and resources, and different ways of doing the same thing: stick to the basics and, after adquiring a solid ground, experiment, seek your own way to attain your objectives.
+//Overwhelming amount of tools and resources, and different ways of doing the same thing (shortcuts, alternative syntax, etc.): stick to the basics, keep consistency, and, after adquiring a solid ground, experiment, seek your own way to attain your objectives.
 
 //OOP
-//SC is an OOP (object-oriented programming language), a programming paradigm based on the concept of "object". In SC there are basically two kinds of objects: classes and methods. Methods are instructions and classes hold information about how to respond to those instructions. Classes are organized within a hierarchy defining their properties. In the class tree, we can see that all classes come from the main branch called "Object".
+//SC is an OOP (object-oriented programming language), a programming paradigm based on the concept of "object" (a thing that does something or represents something). Two main kinds of objects in SC are classes and methods. Methods are instructions and classes hold information about how to respond to those instructions. Classes are organized within a hierarchy defining their properties. In the class tree, we can see that all classes come from the main branch called "Object". Objects created by classes are called instances (so, all classes are instances of the root class Object).
 //Class tree: https://doc.sccode.org/Overviews/ClassTree.html
 CombC //Open the Help file (ctrl + D) and observe how, for instance, CombC comes from CombN --> PureUGen --> UGen --> AbstractFunction --> Object.
 
 /*
 Architecture of SC: https://doc.sccode.org/Guides/ClientVsServer.html
-SC application is based on two basic, autonomous components (two different programs): the server and the client:
+SC application is based on two autonomous components (two different programs): the server and the client; and an IDE:
 - The IDE (Integrated Development Environment): is the environment we see here, the text editor, the menu bar, the postwindow, the status bar, etc. https://doc.sccode.org/Guides/SCIde.html
 - The language: features a specific syntax, that is to say, a set of rules and symbols to express something in that language.
-- The interpreter: if the language is the letter, the interpreter is the mailman. The language and interpreter form the client (sclang). The interpreter translates the language into OSC messages for the server.
-- The audio server (scsynth): receives OSC messages from a client.
+- The interpreter: if the language is the letter, the interpreter is the mailman. The language and interpreter form the client (sclang). The interpreter translates the language into OSC (Open Sound Control) messages for the server.
+- The audio server (scsynth): receives OSC messages from a client and carries out the sound synthesis.
 Because of client and server are two different and independent programs, the audio server can receive OSC messages from a client different than sclang (the so-called external applications in the third diagram of the link). Nevertheless, sclang is dessigned to provide with the expressive power of SC language.
 */
 
 
 //DATA TYPES
-//Data types are different ways of representing and interpreting data (information). They are usually represented as Literals, that is to say, they have a distinctive representation: https://doc.sccode.org/Reference/Literals.html
+//Data types are different ways of representing and interpreting data (information). They are usually represented as Literals: Literals are objects whose value is represented directly in the code (rather than created out of sending a message to an object): https://doc.sccode.org/Reference/Literals.html
 
 //Numbers: can be integers or floating-point numbers (floats):
 //Limits of integer numbers: 32 bits:
@@ -90,7 +90,7 @@ var hello, filter_func
 //Examples of methods: methods send messages to objects called "receivers". There are two kinds of methods: class methods are sent to classes to create objects; instance methods are applied to what a class has created to somehow modify it:
 .play, .midicps, .round
 
-//Classes: classes create and modify objects when receiving messages sent by methods and defined by their arguments.
+//Classes: classes create and modify objects when receiving messages sent by methods and defined by their arguments (parameters that can be modified by specifying their value).
 Server
 SinOsc
 HPF
@@ -125,7 +125,7 @@ HPF
 4.nthPrime; //The fourth prime number in the series of prime numbers.
 34.61946.round(0.01) //Rounding to two decimals (rounding up from 5, down from 4). The argument defines the number of decimals.
 72.round(30) //Keeps number within the multiples of the .round argument value (useful for overtones).
-69.midicps //Midi to Hz converter.
+69.midicps //Midi to Hz (cycles per second) converter.
 440.cpsmidi //Hz to midi converter.
 1.57.asInteger //Turns a float into an integer by rounding down (also shortcut .asInt).
 
@@ -136,7 +136,7 @@ HPF
 5.xrand(1) //Excludes 1.
 5.xrand2 //Includes negative values (no 0 by default).
 10.rand2 //Includes negative values (including 0).
-rrand(0.1, 4) //Random numbers within a range with uniform distribution (both integers = integers only; at least one of them float = all float results) --> Polymorphism: "the ability for different kinds of objects to respond differently to the same message" (different kinds ob object: int / float | same message: rrand).
+rrand(0.1, 4) //Random numbers within a range with uniform distribution (both integers = integers only; at least one of them float = all float results) --> Polymorphism: "the ability for different kinds of objects to respond differently to the same message" (different kinds ob object: int / float | same message: rrand): https://doc.sccode.org/Guides/Polymorphism.html
 exprand(1, 4)//Random numbers within a range with exponential distribution (results will always be float regardless of type of input). The lo/hi limit cannot be zero and the range cannot cross zero.
 
 
@@ -199,7 +199,8 @@ f = { |value1 = 1, value2 = 5, deviation = 0.9| //List of argument and their def
 )
 
 f.value(2, 3, 0.09) //Evaluating the function and sending values to its arguments.
-f.value(deviation: 0.99) //Keyword assignment.
+f.value(deviation: 0.99) //Keyword assignment: specifying the arguments in any order.
+f.value(3, value2: 6) //You can mix normal arguments (in order) and keyword arguments.
 
 //Area of a trapezoid A = ((a + b) / 2) * h:
 (
@@ -231,7 +232,7 @@ Ham
 * marinate //Class method (creates the ham).
 fry //Instance method (modify the ham).
 
-//Syntax object-message: class.method:
+//Syntax object-message: receiver.method(arguments):
 Sandwich.prepare
 
 //Real example in SC: a sine wave receives the method .ar, which makes it create an audio rate signal (class method), with a list of arguments defining the frequency, phase, and amplitude of that signal; then, the signal is placed into a function to which the method .play is applied in order to play the signal (instance method):
@@ -272,6 +273,8 @@ a = Sandwich.prepare(
 a = a.hitUp
 a = a.cut(4) //Arg of .cut is number of pieces.
 
+//Coming back to polymorphism (https://doc.sccode.org/Guides/Polymorphism.html), this is a very importance feature of SC because, for instance, different classes can receive the same message and will respond differently to it ("a message generally has some underlying meaning and it is the responsibility of each class to respond in a way appropriate to that meaning"). For example, the method .ar is used to create audio rate signals: when applied to SinOsc, it will create a sine wave oscillator at audio rate, and when applied to LFTri, it will create a triangle wave oscillator.
+
 
 //COLLECTIONS: ARRAY
 //A collection is an object containing a group of objects: the elements (or items) of the collection. There are many types of collections, but Array is the most common one. A collection between square brackets is by default an Array. The elements of an array are separated by commas and they are assigned an integer called "index" which represent the position or order of the element within the array.
@@ -289,6 +292,7 @@ a = [1, 2, 3, 4, "hello", { SinOsc.ar(mul: 0.1) }]
 a[0] //= 1
 a[4] //= "hello"
 a[5].play //Applying the method .play to the function in index 5.
+a.at(0) //Equivalent to a[0].
 
 //CLASS METHODS for arrays: these class methods create arrays:
 //Array.fill: creates an array with a specific size by evaluating a function as many times as the size states:
@@ -396,6 +400,7 @@ j[..3] //Taking indexes from the first one up to the fourth (including the fourt
 //UGENS: SINOSC
 //Unit Generators or UGens are classes that create or process signals:
 //https://doc.sccode.org/Guides/UGens-and-Synths.html (basic concepts UGen, Synth).
+//https://doc.sccode.org/Guides/Tour_of_UGens.html (guide of most common UGens, useful to find resources).
 UGen
 
 //First UGen: SinOsc, sine wave oscillator:
@@ -706,7 +711,7 @@ add = mul + low limit
 
 
 //Low frequency noise generators: three different interpolations (how it moves from one value to the next):
-//Sound at audio rate:
+//Frequency above the 20 Hz limit (any repetition or iteration performed above 20 Hz of frequency will bring about a frequency spectrum):
 { LFDNoise0.ar(440, 0.2, 0) }.play //Step interpolation.
 { LFDNoise1.ar(440, 0.3, 0) }.play //Linear interpolation.
 { LFDNoise3.ar(880, 0.3, 0) }.play //Cubic interpolation.
