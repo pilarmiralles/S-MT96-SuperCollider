@@ -98,6 +98,7 @@ HPF
 
 //MATHEMATICAL OPERATIONS
 //Unary operations are applied to single numbers (normally, using methods); binary operations are performed between two or more numbers.
+//Here is a list of common unary and binary operators in SC: https://doc.sccode.org/Overviews/Operators.html.
 
 //Basic calculations:
 1 + 1 //Addition
@@ -995,14 +996,14 @@ a + b + c = [a, b, c].sum = Mix([a, b, c])
 	)
 }.play
 )
-
+2/3
 //Filter banks: stacks of filters at a specific intervalic distance (based on overtones rations or equal intervalic ratios):
 (
 {
 	Mix(
 		BPF.ar(
 			PinkNoise.ar,
-			Array.geom(16, 30, 3/2), //Pitagoric fifths (or natural fifths). If inverting the ratio (2/3), downward series (beware the starting frequency).
+			Array.geom(16, 30, 3/2), //Pitagoric fifths (or natural fifths). Reciprocal of the ratio (2/3) = downward series (beware the starting frequency).
 			0.001,
 			5
 		)
