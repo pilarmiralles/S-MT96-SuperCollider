@@ -32,6 +32,7 @@ a = 0; //Initial value.
 
 
 //ROUTINES:
+//More on Routines (and an alternative called "Task") here: https://doc.sccode.org/Tutorials/Getting-Started/15-Sequencing-with-Routines-and-Tasks.html
 //In order to automatize the iteration process of .do, we need a Routine:
 //Difference between "eager" and "lazy" evaluation (function / routine):
 
@@ -149,7 +150,7 @@ r = Routine({
 r.play
 
 //Understanding clocks in SC:
-r.clock //The clock of "r" is "a TempoClock" (the clock by default in SC).
+r.clock //The clock of "r" is "a TempoClock" (the clock by default in SC, measured in beats according to a specific tempo, 60 bpm by default).
 r.clock.tempo //The tempo of "r" is 1.
 r.clock.tempo = 100/60 //We can ask "r" to change it's tempo to 100 bpm.
 r.clock.tempo //Now the tempo of "r" has changed (try out the previous Routine and compare its pace).
