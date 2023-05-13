@@ -22,7 +22,7 @@ https://scsynth.org/t/some-notes-on-writing-supercollider-code-for-non-programme
 //OOP
 //SC is an OOP (object-oriented programming language), a programming paradigm based on the concept of "object" (a thing that does something or represents something). Two main kinds of objects in SC are classes and methods. Methods are instructions and classes hold information about how to respond to those instructions. Classes are organized within a hierarchy defining their properties. In the class tree, we can see that all classes come from the main branch called "Object". Objects created by classes are called instances (so, all classes are instances of the root class Object).
 //Class tree: https://doc.sccode.org/Overviews/ClassTree.html
-CombC //Open the Help file (ctrl + D) and observe how, for instance, CombC comes from CombN --> PureUGen --> UGen --> AbstractFunction --> Object.
+CombC //Open the Help file (ctrl + D) and observe how, for instance, CombC comes from CombN --> PureUGen --> UGen --> AbstractFunction --> Object (Some info about "inheritance" in the last paragraph of this tutorial: https://doc.sccode.org/Tutorials/Getting-Started/12-Groups.html).
 
 /*
 Architecture of SC: https://doc.sccode.org/Guides/ClientVsServer.html
@@ -834,11 +834,13 @@ FreqScope.new //Visualization of the spectrum.
 
 //Multichannel expansion:
 //In SC channels are arrays: a single signal will be played by default through channel 0, whereas an array of two signals will be played through channels 0 and 1. Therefore, a stereo signal is an array of two elements (signals).
+
 s.meter //Visualization of the default channels reserved for output and input signals.
 
 { SinOsc.ar(440, 0, 0.1) }.scope //Coming out through left channel (index 0).
 { SinOsc.ar(440, 0, 0.1 !2) }.scope //Coming out through L-R channels (indexes 0-1).
-{ SinOsc.ar(440, 0, 0.1 !2) }.scope(outbus: 10) //Changing it to channels 10-11 (we can visualize it, but not listen to it as we don't have 12 loudspeakers).
+{ SinOsc.ar(440, 0, 0.1 !2) }.scope(outbus: 10) //Changing it to channels 10-11 (we can visualize it, but not listen to it as channels 10-11 are "private" channels for internal routing).
+//More on this topic: https://doc.sccode.org/Tutorials/Getting-Started/11-Busses.html
 (
 {
 	[

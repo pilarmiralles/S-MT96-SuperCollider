@@ -735,7 +735,7 @@ SynthDef(
 Routine({
 	var buffer, durBuffer, durGrain, position, rate = 1, superposition;
 
-	//Synth(\reverb, [\in, 4, \room, 15, \rev, 3, \mul, 0.2], s, 'addToTail');
+	//Synth(\reverb, [\in, 4, \room, 15, \rev, 3, \mul, 0.2], s, 'addToTail'); //Info on order of execution here: https://doc.sccode.org/Guides/Order-of-execution.html
 
 	position = 0;
 
