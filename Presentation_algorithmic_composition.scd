@@ -726,7 +726,7 @@ SynthDef(
 	 var input, signal;
 
 		input = In.ar(in, 2);
-		signal = GVerb.ar(input, room, rev, mul: mul);
+		signal = GVerb2.ar(input, room, rev, mul: mul);
 		OffsetOut.ar(0, signal)
 }).add
 */
@@ -736,9 +736,9 @@ SynthDef(
 Routine({
 	var buffer, durBuffer, durGrain, position, rate = 1, superposition;
 
-	//Synth(\reverb, [\in, 4, \room, 15, \rev, 3, \mul, 0.2], s, 'addToTail'); //Info on order of execution here: https://doc.sccode.org/Guides/Order-of-execution.html
-
 	position = 0;
+
+	//Synth(\reverb, [\in, 4, \room, 15, \rev, 3, \mul, 0.2], s, 'addToTail'); //Info on order of execution here: https://doc.sccode.org/Guides/Order-of-execution.html
 
 	inf.do({
 
@@ -756,7 +756,8 @@ Routine({
 					\position, position * 44100,
 					\rate, (0.9, 0.95..1.1).wchoose((0.9, 0.95..1.1).normalizeSum),
 					\dur, durGrain,
-					\pan, 0,
+					//\pan, rrand(-0.8, 0.8),
+					\pan, 0, //I like it better with no random pos when no reverb.
 					\amp, 0.5,
 					\out, 0 //reverb = 4, no reverb = 0.
 
