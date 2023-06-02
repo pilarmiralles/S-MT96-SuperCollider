@@ -1,4 +1,4 @@
-//Introduction and sound synthesis basics
+//Introduction to SuperCollider and sound synthesis basics
 /////////////////////////////////////////////////////////////////////
 
 //Download the SuperCollider application here: https://supercollider.github.io/downloads.html

@@ -1,9 +1,9 @@
-//Algorithmic composition: instrument-score and the algorithmic routine (crossfade, overlap, granular)
-/////////////////////////////////////////////////////////////////////////////////////////////////////////
+//Introduction to algorithmic composition in SuperCollider
+/////////////////////////////////////////////////////////////
 
-//INTRODUCTION (just in case) TO ITERATIONS AND ROUTINES (.do, Routine):
+//INTRODUCTION TO ITERATIONS AND ROUTINES (.do, Routine):
 //There are many methods for iteration. Some of them can be found in the Collection help file --> Iteration paragraph: https://depts.washington.edu/dxscdoc/Help/Classes/Collection.html
-//Iteration will eventually allow us to automatize the creation of multiple or successive instances (synths) of a SynthDef.
+//Iteration will eventually allow us to automatize the creation of multiple or successive instances (synths) of a SynthDef and customize their behavior over time.
 
 //METHOD .do:
 //The method .do runs a function for each element of the collection to which the method is applied (it's receiver). The function passes two arguments: the item of the correction, and the iteration number (from 0 to the last index of the collection):
@@ -11,30 +11,32 @@
 //Syntax:
 [element1, element2, ...].do({ |item, iteration| function })
 
-//Example using the item argument:
-[10, 20, 30, 40, 50].do({ |num| rrand(0, num).postln }) //We need to print the results using .postln (otherwise, the only thing that will be printed is the receiver of .do).
+//Example using the item argument: the upper limit of the rrand method will be higher with each iteration:
+[10, 20, 30, 40, 50].do({ |num| rrand(0, num).postln }) //The method .do does not return the result of executing the function. This is why we need .postln in order to get them printed in the postwindow. On the other hand, it always returns its receiver at the end.
+//There is the method .collect, which returns only the results of executing the function, collected within an array:
+[10, 20, 30, 40, 50].collect({ |num| rrand(0, num) })
 
-//Example using the iteration argument:
+//But let's focus on .do for now:
+//Example using the iteration (or index) argument:
 (
-a = [0, 10, 20, 30, 40, 50];
+a = [0, 10, 20, 30, 40, 50]; //The variable "a" contains the receiver array of .do.
 
-a[..4].do({ |num, i| rrand(a[i], a[i + 1]).postln }) //As in the former code, it prints five random values between the limits defined by the function.
+a[..4].do({ |num, i| rrand(a[i], a[i + 1]).postln }) //We execute the function to only indexes 0 to 4 from the array in "a", as we are using "i + 1" in the function and it would point already to the index 5. With each iteration, the range of rrand moves between the next two consecutive indexes (0-10, 10-20, 20-30, and so on).
 )
 
-//When receiving a single number (an integer), .do evaluates the function as many times as the number indicates, that is to say, it actually iterates from 0 up to such a number (thus, the receiver is equivalent to a collection of integers from 0 to the last index (that number): for this reason, the item argument and the iteration argument are equal, so we only use one argument in this case):
+//When receiving a single number (an integer), .do executes the function as many times as the number indicates, that is to say, it actually iterates from 0 up to such a number (thus, the receiver is equivalent to a collection of integers from 0 to the last index -that number- and, for this reason, the item argument and the iteration argument are equal, so we only use one argument in this case):
 100.do({ rrand(1, 64).postln })
 
-//Example: Brownian movement model:
+//Example: Brownian movement model. We obtain 100 values at once:
 (
 a = 0; //Initial value.
-100.do({ a = a + rrand(-1.0, 1.0); a.postln }) //In each iteration, the value of "a" is reassigned.
+100.do({ a = a + rrand(-1.0, 1.0); a.postln }) //In each iteration, the value of "a" is reassigned to "a" plus a random number within the range of deviation.
 )
 
 
 //ROUTINES:
 //More on Routines (and an alternative called "Task") here: https://doc.sccode.org/Tutorials/Getting-Started/15-Sequencing-with-Routines-and-Tasks.html
-//In order to automatize the iteration process of .do, we need a Routine:
-//Difference between "eager" and "lazy" evaluation (function / routine):
+//In order to automatize the iteration process of .do, we need a Routine. Let's first understand the difference between "eager" and "lazy" evaluation or execution in SuperCollider (difference between Function and Routine):
 
 //Function (eager): all instructions are run at once (in order). The postwindow only shows the result of the last line of the function:
 (
@@ -44,21 +46,21 @@ f = {
 	result = 1 + 1;
 	result = result * 1000;
 	result = rrand(0, result);
-	"hi"
+	"hi" //Last line of the function: the only one returned to the postwindow.
 }
 )
 f.value
 
-//Routine (lazy): the class Routine allows the lazy evaluation of a function: each instruction is run when asked to:
+//Routine (lazy): the class Routine allows the lazy evaluation of a function: each instruction is run when it is asked to:
 (
 r = Routine({
 
-	1.yield; //The method .yield indicates each instruction or group of instructions to be evaluated at a time (= "last line of a function").
+	1.yield; //The method .yield indicates each instruction or group of instructions to be executed at a time (as if this was the "last line of a function").
 
 	15.yield;
 })
 )
-r.next //The method .next asks the Routine to evaluate instructions up to each .yield (in order). When all instructions are evaluated, the Routine returns "nil".
+r.next //The method .next asks the Routine to execute instructions up to each .yield (in order). When all instructions are executed, the Routine returns "nil" ("empty").
 r.reset //Reset allows us to come back to the beginning of the function, so that we can run it again directly by using .next.
 
 //More complex example:
@@ -66,6 +68,7 @@ r.reset //Reset allows us to come back to the beginning of the function, so that
 r = Routine({
 	var synth1, synth2, synth3;
 
+	//Each of these blocks (until next .yield) will be executed at once:
 	"hello".postln; //Needs .postln because it is not the line of the .yield.
 	synth1 = { SinOsc.ar(1000, 0, 0.05) }.play;
 	"synth1 created".yield; //No need for .postln as this is the "last line of the function".
@@ -93,6 +96,7 @@ r.reset
 //COMBINING .do AND ROUTINE
 //Automatization of iteration processes:
 
+//These two examples show how .do can represent a loop or iteration of the same function:
 //Without .do:
 (
 r = Routine({
@@ -100,7 +104,6 @@ r = Routine({
 
 	options = [\green, \black, \white];
 
-	//5.do({ opciones.choose.yield })
 	options.choose.yield;
 	options.choose.yield;
 	options.choose.yield;
@@ -122,47 +125,49 @@ r = Routine({
 )
 r.next
 
-//Creating an infinite loop:
+//Creating an infinite loop: .do can receive "inf" as a receiver in order to create an infinite loop. Though in this case the method .yield is essential in order not to make SC crash because of the infinite number of iterations executed at once:
 (
 r = Routine({
 	var options;
 
 	options = [\green, \black, \white];
 
-	inf.do({ options.choose.yield }) //inf as the receiver of .do: method .yield is essential not to make the interpreter crash.
+	inf.do({ options.choose.yield }) //Use .yield!
 })
 )
 r.next
 
-//USING CLOCKS (the actual automatization):
-//As this topic is quite heavy and I will just touch the surface, the following link might be useful to deepen in thiss: https://depts.washington.edu/dxscdoc/Help/Tutorials/Getting-Started/14-Scheduling-Events.html
+//USING CLOCKS
+//In order to automatize the Routine instead of using the method .next repeatedly, we need to make the Routine depend on a clock. This is done by sending to the Routine the method .play. When a Routine received the method .play, it is control by a clock. The number assigned to .yield will represent the time between each iteration of the Rotuine.
+//As the topic of clocks in SC is quite heavy and I will just touch the surface, the following link might be useful to deepen in thiss: https://depts.washington.edu/dxscdoc/Help/Tutorials/Getting-Started/14-Scheduling-Events.html
 
-//Until now, we had to evaluate .next every time we wanted an output from a Routine. In order to avoid that and actually automatize this evaluation, we need to let the Routine be controlled by a clock. We can do this by applying the method .play to the Routine:
+//Routine is controlled by a clock:
 (
 r = Routine({
 
 	inf.do({
 		[\paper, \scissors, \rock].choose.postln;
-		1.yield //The receiver of .yield is the time between each evaluation of the Routine (by default: 1 = 1 sec, or 1 beat at 60bpm).
+		1.yield //The receiver of .yield is the time between each iteration of the Routine (by default: 1 = 1 sec, or 1 beat at 60bpm).
 	})
 })
 )
 r.play
 
 //Understanding clocks in SC:
-r.clock //The clock of "r" is "a TempoClock" (the clock by default in SC, measured in beats according to a specific tempo, 60 bpm by default).
+r.clock //The clock of "r" is "a TempoClock" (the clock by default in SC, measured in beats according to a specific tempo, 60 bpm by default). Other clocks in SuperCollider are SystemClock and AppClock. SystemClock always runs in seconds, so for musical events, it is less flexible than TempoClock. SC resorts to AppClock for lower system priority processes (everything that is not related to sound synthesis, such as graphical interfaces and other non-time-critical tasks. TempoClock is the most flexible for musical events as its unit can depend on different tempos (not just seconds).
 r.clock.tempo //The tempo of "r" is 1.
 r.clock.tempo = 100/60 //We can ask "r" to change it's tempo to 100 bpm.
 r.clock.tempo //Now the tempo of "r" has changed (try out the previous Routine and compare its pace).
 r.clock.tempo = 1 //= 60/60 //Setting the tempo back to 60bpm (second as a referential time unit).
-//By changing the "tempo" in this way, we are changing the default TempoClock of SC, so that all Routines would be subjected to this change.
+//By changing the "tempo" in this way, we are changing the default TempoClock of SC, so that all Routines would be subjected to this tempo.
+r.clock === TempoClock.default //Proof of identity between the clock of "r" and the default TempoClock (returns true).
 
-//Independent clocks: in order to avoid changing the default clock, we can create our own independent clock for a specific Routine:
+//Independent clocks: in order to avoid changing the default TempoClock, we can create our own independent clock for a specific Routine:
 (
 r = Routine({
 	inf.do({
 		[\paper, \scissors, \rock].choose.postln;
-		1.yield //Number 1 is understood as one unit within the 180 bpm set below in the clock.
+		1.yield //Number 1 is understood as one unit (beat) within the 180 bpm set below in the new clock.
 	})
 });
 
@@ -174,26 +179,28 @@ z = Routine({
 });
 )
 
-( //Setting different clocks for each Routine by using the class TempoClock (the method .new is not necessary):
-r.play(TempoClock(180/60)); //Three times faster than "z".
+//Setting different clocks for each Routine by using the class TempoClock (and the method .new, although it can be omitted):
+(
+r.play(TempoClock(180/60)); //Three times faster than "z", check what is returned in the postwindow (one result of "z" every three results of "r").
 z.play(TempoClock(60/60))
 )
 
 //If we run the previous "r" routine (line 141), then we can check that its "tempo" hasn't been affected by these clocks.
 
 TempoClock.tempo = 1 //Let's reset this for the rest of the session (just in case).
+//Anyway, in some situations, creating new clocks and assigning different tempos can be replaced by working with the second as a unit by default and adjusting the waiting time using floats if needed.
 
 
 //First example of the instrument-score relationship (SynthDef-Routine): the automatized iteration process will consists of the successive creation of instances (synths) of a SynthDef:
 (
 SynthDef(
-	\sawtooth,
+	\sawtooth, //Simple SynthDef: a sawtooth oscillator featuring two frequencies is multiplied by a sine envelope.
 	{ |freq|
 		var signal;
 
 		signal = Saw.ar(freq * [1, 1.1], 0.1)
 		*
-		EnvGen.ar(Env.sine(0.1), doneAction: 2);
+		EnvGen.ar(Env.sine(0.1), doneAction: 2); //DoneAction: 2 is essential here in order to avoid that the synths accumulate in the server with each iteration.
 
 		Out.ar(0, signal)
 }).add
@@ -205,10 +212,11 @@ Routine({
 
 	overtones = 400 * (1..11);
 
-	//Outer .do:
+	//Nested or embedded loops:
+	//Outer .do (loops the alternation between the two inner loops, and depends on their waiting times):
 	inf.do({
 
-		//First inner .do:
+		//First inner .do (chooses 5, 7, 10 or 3 frequencies from the array of overtones and send them to the SynthDef, creating different instances of it):
 		([5, 7, 10, 3].choose).do({
 			Synth(\sawtooth,
 				[\freq, overtones.choose.postln]
@@ -216,54 +224,54 @@ Routine({
 			0.1.wait;
 		});
 
-		//Second inner .do:
+		//Second inner .do (creates four instances of the sine oscillator choosing a different random frequency each time):
 		4.do({
 			{ SinOsc.ar(
 				exprand(1000, 8000),
 				0,
 				0.05 !2
 			) * EnvGen.ar(Env.sine(1), doneAction: 2)
-			}.play;
+			}.play; //This .play is not applied to the Routine, but to a function, so its result is to create an instance of a synth out of the function it is applied to.
 
-			1.wait //When using .play wit Routines, it is common to use the method .wait instead of .yield (although they are equivalent).
+			1.wait //When using .play with Routines, it is common to use the method .wait instead of .yield (although they are equivalent).
 		})
 	})
-}).play
+}).play //This .play is sent to the Routine so that it is controlled by a clock.
 )
+
+//The relationship between SynthDef and Routine is very efficient because it allows us to clearly separate the two sides of SuperCollider (although the former example is not the best for this, it can be taken as a reference if we disregard that inner synthesis process within the sine oscillator loop): Routine operates on the Client side while SynthDef works on the Server side. Once SynthDef is compiled, its structure is fixed in the server, but Routine allows us to define different instances of the SynthDef over time, turning SynthDef into a flexible and versatile instrument to follow the "score" define in Routine.
 
 /////////////////////////////////////////////////////////////
 
 //CROSSFADE AND OVERLAP ROUTINES
-//These are a couple of strategies in order to work with the SynthDef-Routine combo by creating continuous textures that can change over time:
+//These are a couple of strategies in order to work with the SynthDef-Routine combo by creating continuous textures -by cross-fading or overlapping various synths- that can change over time:
 
 //CROSSFADE ROUTINES:
-//The idea is to create synths wit a time of fade-in and fade-out: when the fade-out of a synth is initiated, the fade-in of the next synth is triggered, bringing about a continuous cross-fade of synths (constant flow). Therefore, we need the fade-out time of a synth to be shared as fade-in time of the next (and this is the iteration process we need to program alongside the creation of synths):
+//The idea is to create synths wit a time of fade-in and fade-out: when the fade-out of a synth is initiated, the fade-in of the next synth is triggered, bringing about a continuous cross-fade of synths (constant flow). Therefore, we need the fade-out time of a synth to be shared as fade-in time of the next (and this is the iteration process we need to program alongside the creation of synths). The key to make these systems more versatile and make them evolve in time is to use Client-side resources such as Patterns or control structures, which will be studied later on in this document.
 
-//First example, simplest case: equal cross and sustain times:
+//First example, simplest case: equal cross and sustain times. In all cases, the SynthDef will pretty much consist of the same elements, a signal (in this case, a bank of three BPF filtering a BrownNoise, and whose cutoff freq is sent from the Routine), an envelope (in this case, a simple sine envelope) and an Out object which writes the signal multiplied by the envelope to an output channel:
 (
 SynthDef(
 	\filters1,
-	{ |freqs = #[0, 0, 0], crossTime, sustTime| //Sending an array of literals to an argument.
+	{ |freqs = #[0, 0, 0], crossTime, sustTime| //Sending an array of literals to an argument (its size cannot be changed once the SynthDef is compiled).
 		var signal, env;
 
-		signal = {
-			Mix(
-				BPF.ar(
-					BrownNoise.ar,
-					freqs,
-					0.5/freqs,
-					2
-				)
+		signal = Mix(
+			BPF.ar(
+				BrownNoise.ar,
+				freqs,
+				0.5/freqs, //The higher the frequency, the smaller the rq value.
+				2
 			)
-		} !2;
+		) !2; //Mono-duplicated Mix (only three freqs are sent from the Routine, so the same three freqs would be copied on each side anyway if using curly brackets around the Mix.
 
 		env = EnvGen.ar(
 			Env(
-				[0, 1, 1, 0],
+				[0, 1, 1, 0], //The segments of the envelope represent the fade-in, sustain and fade-out of each synth.
 				[crossTime, sustTime, crossTime],
 				\sine
 			),
-			doneAction: 2
+			doneAction: 2 //As before-mentioned, doneAction: 2 is essential to kill the synths after their envelope is done.
 		);
 
 		Out.ar(0, signal * env)
@@ -274,21 +282,21 @@ SynthDef(
 Routine({
 	var freqs;
 
-	freqs = (100 * Array.series(30, 1));
+	freqs = 100 * Array.series(30, 1); //Available frequencies are 30 overtones from the fundamental freq of 100 Hz (100 to 3000 Hz).
 
 	inf.do({
 		Synth(\filters1, [
 			\freqs, { freqs.choose } !3, //Array of three random frequencies.
-			\crossTime, 3,
+			\crossTime, 3, //Cross time and sustain time are equal and fixed.
 			\sustTime, 3,
 		]);
 
-		(3 + 3).wait
+		(3 + 3).wait //Each envelope lasts for 3 + 3 + 3 seconds. The waiting time is only 3 + 3 so that when a synth starts ifs fade-out, the next instance begins its fade-in at the same time, being cross-faded for 3 seconds.
 	})
 }).play
 )
 
-//Second example: different cross and sustain times:
+//Second example: different cross and sustain times. The SynthDef is exactly the same as in the former example. The only difference is that now we need different arguments for the fade-in and fade-out times:
 (
 SynthDef(
 	\filters2,
@@ -322,12 +330,14 @@ SynthDef(
 Routine({
 	var freqs, crossTime1, sustTime, crossTime2;
 
-	freqs = (100 * Array.series(30, 1));
+	//freqs = 200 * Array.series(20, 1); //Option with random overtones from fundamental frequency of 200 Hz.
+	freqs = Scale.minor.ratios * 72.midicps; //Option with pitches from a minor scale within the octave of C5.
 
-	crossTime1 = rrand(1.0, 8); //Initial fade-in time.
+	crossTime1 = rrand(1.0, 8); //Initial fade-in time (only applicable during the first iteration, later dependant on the crossTime2).
 
 	inf.do({
 
+		//Sustain and cross times are now radomly chosen in each iteration:
 		sustTime = rrand(1.0, 8);
 		crossTime2 = rrand(1.0, 8);
 
@@ -338,17 +348,17 @@ Routine({
 			\crossTime2, crossTime2
 		]);
 
-		[crossTime1, sustTime, crossTime2].round(0.1).postln; //For testing.
+		[crossTime1, sustTime, crossTime2].round(0.1).postln; //For testing: the three times of the envelope segments are printed so that it can be checked that the duration of the third segment is each time equal to the duration of the first segment in the next envelope. Any line of the code dedicated to testing should be eliminated or commented when the testing is done, so that it does not consume CPU resources.
 
-		(crossTime1 + sustTime).wait;
+		(crossTime1 + sustTime).wait; //Again, the fade-out time is excluded from the wait time so that the synths are overlapped during the cross time.
 
-		crossTime1 = crossTime2;
+		crossTime1 = crossTime2; //This is the key step of this example: the fade-out time is reassigned as the fade-in time of the next synth at the end of each iteration of the Routine.
 
 	})
 }).play
 )
 
-//More advanced example: construction of melodies:
+//More advanced example (although simplified Routine by using same fade-in and fade-out times, so no need to reassign the variable): construction of melodies:
 (
 SynthDef(
 	\gendy3,
@@ -357,7 +367,7 @@ SynthDef(
 
 		signal = Pan2.ar(
 			Mix(
-				Gendy3.ar( //I am still looking into this UGen lately, so don't worry about it (it is just something I am trying out).
+				Gendy3.ar( //You can disregard this part of the synthesis and use any other UGen, as Gendy3 is something I am still trying out lately (see help file if curious). The only important part is the frequency argument, where I am sending values from the Routine.
 					0, 0, SinOsc.kr(0.1, 0, 0.1, 0.9), 1.0,
 					Array.geom(5, freq.midicps, 2) * Array.fill(5, { Rand(0.95, 1.05) }), //rrand can be used instead of Rand to maintain the same deviation value.
 					0.011, 0.005, 12, 12, amp)
@@ -375,7 +385,7 @@ SynthDef(
 
 		finalSignal = signal * env;
 
-		reverb = FreeVerb.ar(finalSignal,  0.9, 1, 1);
+		reverb = FreeVerb.ar(finalSignal,  0.9, 1, 1); //Applying a very simple reverb (in, mix, room, damp and mul, as arguments here).
 		DetectSilence.ar(reverb, doneAction: 2); //This class allows us to kill the synth after the reverb is done, instead of killing it from the envelope, which would cause a sudden cut of the reverberation. It is useful for processes such as reverb or delays, which usually end a bit after the envelope of the synth has ended.
 
 		Out.ar(out, reverb)
@@ -387,14 +397,14 @@ SynthDef(
 Routine({
 	var sustTime, crossTime, freqs;
 
-	sustTime = Pn(Pstutter(3, Pshuf([1, 1, 2, 2, 4], 1)), inf).asStream; //As we haven't talked about patterns yet, you just need to know that this creates a sequence of sustTime values (a "stream") called from .do by using the method .next.
-	crossTime = 0.7;
+	sustTime = Pn(Pdup(3, Pshuf([1, 1, 2, 2, 4] * 0.5, 1)), inf).asStream; //As we haven't talked about patterns yet, you just need to know that this creates a sequence of sustTime values (a "stream") called from .do by using the method .next.
+	crossTime = 0.2;
 
-	freqs = [19, 21, 22, 24, 26, 27, 29, 31]; //Minor scale from G.
+	freqs = Scale.minor.ratios * 19; //Minor scale from G (the midi to cps conversion happens in the SynthDef). These freqs are very low because they are used as the root of a bank of octaves.
 
 	inf.do({ var thisSustTime;
 
-		thisSustTime = sustTime.next;
+		thisSustTime = sustTime.next; //Here is where .do ask for values from the sustTime pattern, one for each iteration.
 
 		Synth(\gendy3,
 			[
@@ -412,17 +422,21 @@ Routine({
 }).play
 )
 
+
 //OVERLAP ROUTINES:
 //The idea is to create several synths at the same time, being this number of synths controlled by us through an argument "density". The synths will replace each other continuously in the server: for this, we need the waiting time to be equal to the entire duration of each synth divided by the number of synths (density).
 
-//First example:
+//First example: the SynthDef is similar to the one used for cross-fade Routines. We are only sending one frequency at a time, and we are including the new argument "density", which in the SynthDef is only used to control the amplitude balance according to the number of synths we want to be running at the same time:
 (
 SynthDef(
 	\overlapFilter,
 	{ |freq, crossTime = 5, sustTime = 5, density = 5|
 		var signal, env, individualAmp;
 
-		individualAmp = ((density.log2 + 1) * -3.01).dbamp * 0.5; //Amplitude balance based on the number of synths at the same time (applied to the levels of the envelope to lower the amplitude accordingly).
+		individualAmp = ((density.log2 + 1) * -3.01).dbamp * 0.5; //Amplitude balance based on the number of synths running at the same time (applied to the levels of the envelope to lower the amplitude accordingly). Why this formule? It just works quite well, but here are some hints about why (the * 0.5 at the end can be adjusted as kind of a master volume for further amplitude control of the entire formule):
+//When density = 1, 1.log2 would be 0, so to avoid the 0, there is the + 1 and the amplitude would be then -3.01 dB (* 0.5 is needed when converted with .dbamp to amplitude ratioss).
+//When density = 2, 2.log2 would be 1, so 1 + 1 = 2, and 2 * -3.01 = -6.02 dB, which is more or less half of the amplitude for each).
+//The logarithmic function continues like this as it goes up, balancing the density in dB as these work within the logarithmic scale.
 
 		signal = BPF.ar(
 			BrownNoise.ar(1 !2),
@@ -433,7 +447,7 @@ SynthDef(
 
 		env = EnvGen.ar(
 			Env(
-				[0, 1, 1, 0] * individualAmp,
+				[0, 1, 1, 0] * individualAmp, //Amplitude balance (multiplied by all levels of the amplitude envelope.
 				[crossTime, sustTime, crossTime],
 				\sine
 			),
@@ -444,7 +458,7 @@ SynthDef(
 }).add
 )
 
-( //Open the node tree when evaluating the Routine to observe how the synth appear and replace each other at a regular pace of (crossTime + sustTime + crossTime) / density (in this case, every 3 seconds), and keeping a constant flow of 5 synths at the same time:
+( //Open the node tree when executing the Routine to observe how the synths appear gradually and replace each other at a regular pace of (crossTime + sustTime + crossTime) / density (in this case, every 3 seconds as the total time of each synth is 15 secs and the density is 5: 15/5 = 3), and keeping a constant flow of 5 synths at the same time:
 Routine({
 	var density, crossTime, sustTime, freqs;
 
@@ -453,7 +467,8 @@ Routine({
 	crossTime = 5;
 	sustTime = 5;
 
-	freqs = Array.geom(10, 100, 3/2);
+	//freqs = Array.geom(10, 100, 3/2); //Option for stack of fifths.
+	freqs = Scale.minor.ratios * 72.midicps; //Option for minor scale within the C5 octave.
 
 	inf.do({
 		Synth(\overlapFilter,
@@ -468,7 +483,13 @@ Routine({
 }).play
 )
 
-//Glissando effect (using the same SynthDef): try out the four possible combinations:
+//Glissando effect (using the same SynthDef as in the previous example): try out the four possible combinations:
+/*
+- Line [0, freqs.lastIndex] and freqs[line.next.asInteger.postln..].choose --> Available indexes for choosing start from the entire array and close towards the very last index alone (high freq).
+- Line [0, freqs.lastIndex] and freqs[..line.next.asInteger.postln].choose --> Available indexes for choosing start from the very first index only (low freq) and open up towards the entire array.
+- Line [freqs.lastIndex, 0] and freqs[line.next.asInteger.postln..].choose --> Available indexes for choosing start from the very last index only (high freq) and open down towards the entire array.
+- Line [freqs.lastIndex, 0] and freqs[..line.next.asInteger.postln].choose --> Available indexes for choosing start from the entire array and close towards to very first index alone (low freq).
+*/
 (
 Routine({
 	var density, crossTime, sustTime, freqs, line;
@@ -477,13 +498,16 @@ Routine({
 	crossTime = 2;
 	sustTime = 2;
 
-	freqs = Array.geom(200, 35, 0.5.midiratio);
-	line = Env([0, freqs.lastIndex], 6).asStream; //[freqs.lastIndex, 0] downward opetion.
+	freqs = Array.geom(200, 35, 0.5.midiratio); //Series of 200 quarter tones (0.5.midiratio) from 35 Hz.
+
+	//The line is 6 seconds long (equivalent time to the total duration of synths' envelope (2 + 2 + 2). The line is created by turning an envelope into a stream (this could have been done with a Pattern instead), so that we can ask for each value from the loop by using the method .next. The values given by this envelope are the indexes of the array of frequencies (from the first to the last or from the last to the first, if choosing the downward option):
+	line = Env([0, freqs.lastIndex], 6).asStream; //[freqs.lastIndex, 0] downward option.
 
 	inf.do({
 		Synth(\overlapFilter,
 			[
-				\freq, freqs[line.next.asInt.postln..].choose, //[..line.next.asInt.postln] opposite option.
+				//Asking the line for each value by using .next:
+				\freq, freqs[line.next.asInteger.postln..].choose, //[..line.next.asInteger.postln] opposite option. Remember that the two dots mean "from this index up to the last available index" or "from the first available index up to this index".
 				\crossTime, crossTime,
 				\sustTime, sustTime,
 				\density, density,
@@ -493,7 +517,7 @@ Routine({
 }).play
 )
 
-//Last example: more continuous texture:
+//Last example: more continuous texture ("under the sea"):
 (
 SynthDef(
 	\machinesComb,
@@ -502,6 +526,7 @@ SynthDef(
 
 		individualAmp = ((density.log2 + 1) * -3.01).dbamp;
 
+		//Each step of the sound synthesis is separated and demonstrated below the SynthDef (the rest of the SynthDef hasn't changed compared to previous examples of overlap Routines):
 		signal = BPF.ar(
 			Pulse.ar(freqPulse, PinkNoise.ar(mulNoise !2), 0.2),
 			freq,
@@ -527,10 +552,11 @@ SynthDef(
 )
 
 //All synthesis process separated:
+//First, a BPF is filtering a pulse oscillator, whose "width" argument is being modulated by a PinkNoise (this was kind of an accident. The "noisy" result is more unstable and glitchy when the mul of the PinkNoise is higher, but I don't exactly know yet what is happening to the width value, if it is being multiplied or added or...):
 (
 {
 	BPF.ar(
-		Pulse.ar(30, PinkNoise.ar(1 !2), 0.2),
+		Pulse.ar(30, PinkNoise.ar(1 !2), 0.2), //Different randomness on each side.
 		560,
 		0.02,
 		10
@@ -538,6 +564,7 @@ SynthDef(
 }.play
 )
 
+//The former signal is being resonated by a comb filter at 40 Hz.
 (
 { var signal;
 
@@ -552,6 +579,7 @@ SynthDef(
 }.play
 )
 
+//The last step is to add the original signal to the comb one and balance the amplitude:
 (
 { var signal, comb;
 
@@ -568,13 +596,14 @@ SynthDef(
 }.play
 )
 
-//Routine:
+//Routine: using Tdef (see explanation below this Routine: Tdef comes from the JITlib, "junt in time library", which allow us, in this case, to change parameters of the routine and execute it again while running. The new values will be replaced in the next iteration of the Routine. Also, it needs a name):
 (
 Tdef(\underTheSea, {
 	var density, transitionTime, sustainTime, root, freqs;
 
 	density = 50;
 
+	//Random transition and sustain times:
 	transitionTime = rrand(1, 3.5);
 	sustainTime = rrand(1, 3.5);
 
@@ -582,10 +611,10 @@ Tdef(\underTheSea, {
 
 	inf.do({
 
-		/* Tonal version:
-		root = [19, 21, 22, 24, 26, 27, 29, 31].midicps.choose;
+		/* Tonal version (comment the previous freqs variable):
+		root = [19, 21, 22, 24, 26, 27, 29, 31].midicps.choose; //Minor scale.
 
-		freqs = Array.geom(6, root, 2);
+		freqs = Array.geom(6, root, 2); //Minor scale degrees used as roots of an octave filter bank.
 		*/
 
 		Synth(\machinesComb,
@@ -608,7 +637,8 @@ Tdef(\underTheSea, {
 }).play
 )
 
-//No sound example of Tdef (try out adding or deleting characters in the string, changing the wait time, etc.):
+//Examples of how Tdef works:
+//No sound example of Tdef (try out adding or deleting characters in the string, changing the wait time, etc. while the loop is running, and executing it again to replace the values in real time):
 (
 Tdef(\tdef, {
 
@@ -630,13 +660,15 @@ Tdef(\tdef, {
 }).play
 )
 
+//More information about the JITlib: https://doc.sccode.org/Overviews/JITLib.html
+
 /////////////////////////////////////////////////////////////
 
 //"FAKE GRANULAR" SYNTHESIS (work with buffers)
-//The idea is to implement the SynthDef-Routine combo while using audio samples as input instead of audio synthesis processes. The audio samples are cut into pieces and different parameters are randomized in order to create different textures that can change over time. I call this strategy "fake granular" because I usually cut the audio samples into chunks that are bigger than the "conventional" size of a grain in granular synthesis. Nonetheless, this model of granulator can be used for conventional granular synthesis as well.
+//The idea is to implement the SynthDef-Routine combo while using audio samples as input instead of audio synthesis processes. The audio samples are cut into pieces and different parameters are randomized in order to create different textures that can change over time. I call this strategy "fake granular" because I usually cut the audio samples into chunks that are bigger than the "conventional" size of a grain in granular synthesis. Nonetheless, this model of granulator is efficient enough to be used for conventional granular synthesis as well. Of course, there are UGens in SC for granular synthesis, such as TGrains, but the advantage of a handmade granulator is to be able to understand the background process and control every detail of it:
 
 //Building a granulator:
-p = Platform.resourceDir +/+ "sounds/a11wlk01.wav" //Default audio sample from SC.
+p = Platform.resourceDir +/+ "sounds/a11wlk01.wav" //Very ugly default audio sample from SC (good for testing as it is available in every computer where SC has been downloaded).
 
 b = Buffer.read(s, p) //Allocating the buffer and reading the sample into it.
 b.query //Information about the buffer "b".
@@ -648,8 +680,10 @@ SynthDef(
 	{ |bufnum, position, rate, dur, pan, amp = 0.1|
 		var signal, env;
 
-		signal = PlayBuf.ar(1, bufnum, rate, 1, position);
-		//signal = signal[0];
+		//We only need a signal, which will be our audio sample (using PlayBuf here to play it), and an envelope (a sine envelope is conventionally used for granular synthesis, but any other kind can be tested):
+
+		signal = PlayBuf.ar(1, bufnum, BufRateScale.kr(bufnum) * rate, 1, position); //The rate receives the object BufRateScale applied to the specific buffer number in order to compensate the possible difference of sampling rate (between the audio sample and the one stablished in SC).
+		//signal = signal[0]; //In case out audio sample has two channels and want to apply a panner to it, we can just select one channel of it with this line.
 		signal = Pan2.ar(signal, pan);
 
 		env = EnvGen.ar(
@@ -657,14 +691,14 @@ SynthDef(
 			doneAction: 2
 		);
 
-		OffsetOut.ar(0, signal * env)
+		OffsetOut.ar(0, signal * env) //Using OffsetOut: when creating something above 20 synths per seconds, it is possible that a frequency spectrum is generatesd. OffsetOut helps to avoid this by creating a small delay when the synths are sent to the server based on the control cycles s(see the Help file).
 
 }).add
 )
 
-Synth(\grain, [\bufnum, b.bufnum, \position, 2 * 44100, \rate, 1, \dur, 0.1, \pan, 0]) //Isolated grain.
+Synth(\grain, [\bufnum, b.bufnum, \position, 2 * 44100, \rate, 1, \dur, 0.1, \pan, 0]) //Isolated grain for testing (remember that the position is measured in frames, so it will be equal to the time in seconds * sampling rate.
 
-(
+( //The Routine will successively create grains and randomize parameters from the granulator (SynthDef):
 Routine({
 	var durBuffer, durGrain, position, rate = 1;
 
@@ -672,36 +706,36 @@ Routine({
 
 	inf.do({
 
-		durGrain = rrand(0.0, durBuffer);
-		//durGrain = rrand(0.01, 0.2); //Alternative for the durGrain (short grains).
+		durGrain = rrand(0.0, durBuffer); //In this case, the duration of each grain can go from 0 to the total duration of the buffer (around 4 seconds).
+		//durGrain = rrand(0.01, 0.2); //Alternative for the durGrain (random short grains).
 
-		position = rrand(0, durBuffer - durGrain) * 44100;
+		position = rrand(0, durBuffer - durGrain) * 44100; //The position could be anywhere from 0 to the duration of the sample, but subtracting the duration of the current grain so that it does not exceed the total duration of the sample. Then, it is converted to frames by multiplying by the sampling rate.
 
-		s.bind({
+		s.bind({ //Yet another tool to control the large amount of synth in a short duration that is usual in granular synthesis. The method .bind refers to the server ("s") and is related with its latency in order to deal with timing inaccuracies when transmitting lots of OSC messages in a short period of time.
 			Synth(
 				\grain,
 				[
 					\bufnum, b.bufnum,
 					\position, position,
-					\rate, rate, //rrand(0.5, 2) / rrand(1.midiratio, 7.midiratio).
+					\rate, rate, //The rate could be randomized: rrand(0.5, 2) / rrand(1.midiratio, 7.midiratio).
 					\dur, durGrain,
-					\pan, rrand(-1.0, 1.0),
+					\pan, rrand(-1.0, 1.0), //Randomized panning.
 					\amp, 0.1
 			]);
 		});
 		//0.1.wait //"Synchronous granular synthesis".
-		rrand(0.01, 0.1).wait //"Asynchronous granular synthesis".
+		rrand(0.01, 0.1).wait //"Asynchronous granular synthesis" (randonmized waiting time between grains).
 	});
 }).play
 )
 
-//Another example (same SynthDef):
+//Another example (same SynthDef) using two audio samples:
 (
-c = Buffer.read(s, "F:/DOCUMENTOS/1 Year 2022-2023/SUPERCOLLIDER/S-MT96-SuperCollider/Algorithmic composition presentation/Audio-for-granular-examples-1.wav");
-d = Buffer.read(s, "F:/DOCUMENTOS/1 Year 2022-2023/SUPERCOLLIDER/S-MT96-SuperCollider/Algorithmic composition presentation/Audio-for-granular-examples-2.wav")
+c = Buffer.read(s, "F:/DOCUMENTOS/1 Year 2022-2023/SUPERCOLLIDER/S-MT96-SuperCollider/Audio samples/Audio-for-granular-examples-1.wav");
+d = Buffer.read(s, "F:/DOCUMENTOS/1 Year 2022-2023/SUPERCOLLIDER/S-MT96-SuperCollider/Audio samples/Audio-for-granular-examples-2.wav")
 )
 
-(
+( //Same SynthDef, just adding the line to take one of the two channels of the audio samples so that they can be panned:
 SynthDef(
 	\grain2,
 	{ |out = 0, bufnum, position, rate, dur, pan, amp = 0.1|
@@ -720,7 +754,7 @@ SynthDef(
 
 }).add;
 /*
-SynthDef(
+SynthDef( //Possible use of this second SynthDef to pass the previous output through a private channel and apply a reverb to it:
 	\reverb,
 	{ |in, room, rev, mul|
 	 var input, signal;
@@ -736,17 +770,18 @@ SynthDef(
 Routine({
 	var buffer, durBuffer, durGrain, position, rate = 1, superposition;
 
-	position = 0;
+	position = 0; //Initial value for the position as the position is reassigned a the end of the loop, this will only affect the frist grain).
 
+	//This is the line we would need to pass the samples through the reverb (also, change the out value from 0 to private channel 4):
 	//Synth(\reverb, [\in, 4, \room, 15, \rev, 3, \mul, 0.2], s, 'addToTail'); //Info on order of execution here: https://doc.sccode.org/Guides/Order-of-execution.html
 
 	inf.do({
 
-		buffer = [c, d].choose;
+		buffer = [c, d].choose; //Choosing a random sample.
 
 		durBuffer = buffer.duration;
 		durGrain = rrand(0.5, 2.5);
-		superposition = 3;
+		superposition = 3; //This new variable will be used at the waiting time so that it is, in this case, three times shorter than the duration of the current grain, provoking the superposition or overlapping of grains.
 
 		s.bind({
 			Synth(
@@ -754,7 +789,7 @@ Routine({
 				[
 					\bufnum, buffer.bufnum,
 					\position, position * 44100,
-					\rate, (0.9, 0.95..1.1).wchoose((0.9, 0.95..1.1).normalizeSum),
+					\rate, (0.9, 0.95..1.1).wchoose((0.9, 0.95..1.1).normalizeSum), //Choosing the rate with a specific probability for each value.
 					\dur, durGrain,
 					//\pan, rrand(-0.8, 0.8),
 					\pan, 0, //I like it better with no random pos when no reverb.
@@ -765,6 +800,8 @@ Routine({
 				s, 'addToHead'
 			);
 		});
+
+		//This wait, we are able to make the sample advance "in order": the new position will always be the current position + 1, up to the duration of the buffer (by applying the module, so that it folds):
 		position = (position + 1) % durBuffer;
 		//position = (position + durGrain) % durBuffer;
 
@@ -778,12 +815,13 @@ Routine({
 
 //EXAMPLES OF CODES USED IN ACTUAL PIECES
 //These two combos os SynthDef-Routine and some of the audio samples used for them are based on the processes we have been talking about. I thought it would be interesting to show some blocks of code whose output was directly used in a composition. Both of them are actually based on the "fake granular" model. The actual key of these codes is the pattern they use. We haven't study the patterns yet, but you just need to know that they create a sequence of values (a stream) that can be asked one by one later on using the method .next.
+//As these codes do not differ much from other we have seen so far in this document, I will only explain the key strategy I used in each of them, leaving the rest for your own analysis:
 
 //THE WORN-OUT FACTORY
 (
-b = Buffer.read(s, "F:/DOCUMENTOS/1 Year 2022-2023/SUPERCOLLIDER/S-MT96-SuperCollider/Algorithmic composition presentation/Pum.wav");
-c = Buffer.read(s, "F:/DOCUMENTOS/1 Year 2022-2023/SUPERCOLLIDER/S-MT96-SuperCollider/Algorithmic composition presentation/Tras.wav");
-d = Buffer.read(s, "F:/DOCUMENTOS/1 Year 2022-2023/SUPERCOLLIDER/S-MT96-SuperCollider/Algorithmic composition presentation/Warn.wav")
+b = Buffer.read(s, "F:/DOCUMENTOS/1 Year 2022-2023/SUPERCOLLIDER/S-MT96-SuperCollider/Audio samples/Pum.wav");
+c = Buffer.read(s, "F:/DOCUMENTOS/1 Year 2022-2023/SUPERCOLLIDER/S-MT96-SuperCollider/Audio samples/Tras.wav");
+d = Buffer.read(s, "F:/DOCUMENTOS/1 Year 2022-2023/SUPERCOLLIDER/S-MT96-SuperCollider/Audio samples/Warn.wav")
 )
 
 (
@@ -830,10 +868,15 @@ Routine({
 
 	position = 0;
 
+	//Both the duration of the grains and the rate are controlled by Pseg, which is a Pattern that creates an envelope (including an array of levels, an array of times including an interpolation time from the last to the first value, and an array of curves. The last argument means that the Pattern will produce infinite values as far as it is asked to):
+	//Envelope for the duration of the grains (from 3 to 0.01 seconds in 60 seconds, and back to 3 seconds in 10 seconds):
 	durGrain = Pseg([3.0, 0.01], [60, 10], \lin, inf).asStream;
 
+	//Envelope for the low and high limits of the rate random choice (the range goes from 0.125-0.5 to 2.5-6.0 in 40 seconds, and back to 0.125-0.5 in 20 seconds.
 	speedMin = Pseg([0.125, 2.5], [40, 20], \lin, inf).asStream;
 	speedMax = Pseg([0.5, 6.0], [40, 20], \lin, inf).asStream;
+
+	//The envelope of durations is 70 seconds long in total, whereas the envelope of rate values is 60 seconds long in total, so there will be a 10 seconds asynchronicity which will create different combinations of both parameters over time and this is what makes this Routine more interesting, alongside the possible randomization featured by many other parameters.
 
 	inf.do({
 
@@ -867,8 +910,8 @@ Routine({
 
 //CARESSING YOU TILL MY FINGERS BLEED
 (
-c = Buffer.read(s, "F:/DOCUMENTOS/1 Year 2022-2023/SUPERCOLLIDER/S-MT96-SuperCollider/Algorithmic composition presentation/High-synthetic-sounds.wav");
-d = Buffer.read(s, "F:/DOCUMENTOS/1 Year 2022-2023/SUPERCOLLIDER/S-MT96-SuperCollider/Algorithmic composition presentation/Low-comb-sound.wav")
+c = Buffer.read(s, "F:/DOCUMENTOS/1 Year 2022-2023/SUPERCOLLIDER/S-MT96-SuperCollider/Audio samples/High-synthetic-sounds.wav");
+d = Buffer.read(s, "F:/DOCUMENTOS/1 Year 2022-2023/SUPERCOLLIDER/S-MT96-SuperCollider/Audio samples/Low-comb-sound.wav")
 )
 
 (
@@ -887,7 +930,7 @@ SynthDef(
 
 }).add;
 SynthDef(
-    \reverb,
+	\reverb, //Using a handmade Schroeder filter (parallel comb filter, series of Allpass filters and a LPF at the end):
     { |out = 0, in, time|
         var input, dry, wet, signalOut;
 
@@ -925,6 +968,7 @@ Routine({
 
     superposition = 3;
 
+	//This is the key strategy of this Routine, and it is yet another Pattern called Plazy. The Pseq at the end simply return the values of an array in order, so what Plazy does is to create a new array for Pseq each time the previous array is completed. This array is an arithmetic series in which the size and step are randomized (the start is always 0.5). There can be from 5 to 12 steps, and the steps can be from 0.1 to 0.5. On top of that, the array is mirrored, so that the rate will go upwards and downwards, but the mirror is not completely symetric as one of the samples does not feature a static frequency and thus the rate will be applied to a different pitch. The Pn at the beginning simply allows the Plazy to be refreshed every time it is executed (so that the random values are different):
     speedPattern = Pn(
         Plazy({
             var array;
@@ -939,19 +983,19 @@ Routine({
         inf
     ).asStream;
 
-    bufferPattern = Pwrand([c, d], [2, 5].normalizeSum, inf).asStream;
+	bufferPattern = Pwrand([c, d], [2, 5].normalizeSum, inf).asStream; //Using a pattern for choosing between both audio samples with a probability (just like using .wchoose).
 
     inf.do({ |i|
 
-        if (i == 0, { buffer = d }, { buffer = bufferPattern.next });
+		if (i == 0, { buffer = d }, { buffer = bufferPattern.next }); //This line is just a conditional to avoid playing the buffer "c" in the first iteration. After the first iteration, the random choice stablished in the bufferPattern works normally.
 
         durBuffer = buffer.duration;
 
         waitTime = rrand(0.5, 3);
-        durGrain = waitTime * superposition;
+		durGrain = waitTime * superposition; //A different way of provoking superposition is to calculate the wait time to that is it (in this case) 3 times longer than the wait time.
 
-        speed = speedPattern.next;
-		speed.round(0.1).postln; //For testing.
+        speed = speedPattern.next; //Asking the rate pattern for values one at a time.
+		speed.round(0.1).postln; //For testing: printing the rate values (rounded to one decimal).
 
         position = (position + waitTime) % durBuffer;
 
@@ -968,15 +1012,15 @@ Routine({
                 s, \addToHead
             )
         });
-        (waitTime * rrand(0.975, 1.025)).wait;
+		(waitTime * rrand(0.975, 1.025)).wait; //Slight random deviation in the waiting time so that any possible frequency spectrum out of periodicity is avoided (although sometimes the timbre is better without deviation, it is a matter of testing it).
     });
 }).play
 )
 
 /////////////////////////////////////////////////////////////
 
-//ALGORITHMIC COMPOSITION TOOLS: BOOLEANS AND PATTERNS
-//Some other tools that might be useful in these kind of algoritmic systems are booleans, control structures and patterns.
+//ALGORITHMIC COMPOSITION TOOLS: CONTROL STRUCTURES AND PATTERNS
+//Some other tools that might be useful in these kind of algoritmic systems are control structures and patterns.
 
 //BOOLEAN EXPRESSIONS
 //Boolean expressions return the literals "true" or "false". Therefore, they are useful for making an operation or process depend on something (such as a "condition"):
@@ -994,7 +1038,7 @@ x.isNil //Is empty
 
 //Control structures: control structures are normally based on boolean expressions (in order to express conditions, for example). Control structures are tools that choose directions in which to go or output to be returned based on given parameters and conditions. Some of these control structures are explained here: https://doc.sccode.org/Reference/Control-Structures.html
 
-//"If", three syntaxes: if the boolean expression returns true, the first function is evaluated, and if not, the second function is evaluated:
+//"If", three syntaxes: if the boolean expression returns true, the first function is executed, and if not, the second function is executed:
 
 if (1 > 2, { "true".postln }, { "false".postln }) //The one I normally use.
 
@@ -1007,7 +1051,7 @@ if ((i % 3) == 0, { function1 }, { function2 }) //Something happens every three 
 if (i.asInteger.even, { function1 }, { function2 }) //Alternating between two options.
 if (0.5.coin.and(i != 0), { function1 }, { function2 }) //Avoiding applying condition to the first iteration.
 
-//"While": it only executes the second function if the first function returns true (and re-evaluates again as far as it returns true, so it is a conditional loop):
+//"While": it only executes the second function if the first function returns true (and re-executes again as far as it returns true, so it is a conditional loop):
 (
 while(
     { var value;
@@ -1020,7 +1064,7 @@ while(
 )
 )
 
-//"Switch": given an initial operation, and some pairs of result-function, it evaluate a different function according to the result of the operation each time. There is an "else case" at the end of the pairs:
+//"Switch": given an initial operation, and some pairs of result-function, it executes a different function according to the result of the operation each time. There is an "else case" at the end of the pairs:
 (
 var value;
 
@@ -1055,6 +1099,8 @@ case
 
 //PATTERNS
 //I really recommend the "practical guide" for patterns in SC Help files: https://doc.sccode.org/Tutorials/A-Practical-Guide/PG_01_Introduction.html
+//This is another practical guide: https://doc.sccode.org/Tutorials/Streams-Patterns-Events1.html
+
 //Patterns are one of the most powerful features of SC, but they can be difficult to approach and sometimes their specific Help file doesn't help. Patterns define calculations or tasks to fulfill and normally suppose a shortcut to those operations. Thus, they are quite efficient to use whenever they suit for the specific calculation that is needed.
 //We normally use patterns to create sequences or "streams" of values (often numbers, although they may even stream synths or any kind of object). When used as streams, we apply to them the method .asStream, and later on, we call them to return one value at a time using the method .next. There are over 120 patterns in SC, so we will just mention some of the most usual ones (you might look into the guide to find other patterns to suit your own needs):
 
@@ -1272,7 +1318,7 @@ Routine({
 }).play
 )
 
-//PLAZY: runs a function that returns (as its last line) another pattern. That means that Plazy allows us to "customize" the pattern it returns. It is usually used in combination with Pn, so that the function can be evaluated as many times as needed and its possible randomness is refreshed, returning different results:
+//PLAZY: runs a function that returns (as its last line) another pattern. That means that Plazy allows us to "customize" the pattern it returns. It is usually used in combination with Pn, so that the function can be executed as many times as needed and its possible randomness is refreshed, returning different results:
 //Example with numbers:
 (
 var stream;
@@ -1313,7 +1359,7 @@ pan = Pseq([-1, 1], inf).asStream; //The pattern for pan alternates between -1 a
 
 Routine({
     inf.do({
-        thisDur = durations.next;
+        thisDur = durations.next; //As we will use this value in several places, we need to put it into a variable. Otherwise, we would create different instances of a patterns that involves random processes, and thus we would obtain different values from each instance.
 
         Synth(
             \sine,
@@ -1367,7 +1413,7 @@ stream = Pbrown(0, 10, 1, 10).asStream;
 15.do({ stream.next.postln })
 )
 
-//Brownian motion model:
+//Brownian motion model (yet again):
 a = 1 //Initial value.
 a = (a + rrand(-1.0, 1.0)).fold(0.0, 10.0) //If going above 10, it folds (same if going below 0).
 
