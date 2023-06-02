@@ -1,5 +1,5 @@
 //Introduction to SuperCollider and sound synthesis basics
-/////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
 
 //Download the SuperCollider application here: https://supercollider.github.io/downloads.html
 //SuperCollider plugins (extensions for the SC audio server) and how to install: https://supercollider.github.io/sc3-plugins/

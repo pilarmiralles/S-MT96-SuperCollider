@@ -1,5 +1,5 @@
 //Introduction to algorithmic composition in SuperCollider
-/////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////
 
 //INTRODUCTION TO ITERATIONS AND ROUTINES (.do, Routine):
 //There are many methods for iteration. Some of them can be found in the Collection help file --> Iteration paragraph: https://depts.washington.edu/dxscdoc/Help/Classes/Collection.html
