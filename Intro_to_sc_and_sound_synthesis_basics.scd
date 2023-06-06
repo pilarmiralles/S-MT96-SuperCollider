@@ -517,6 +517,10 @@ SinOsc
 //Arguments of .ar method, that is to say, the parameters of the instance created by sending that method that we can modify: frequency, phase, mul, add:
 SinOsc.ar(67.midicps, 0, 0.2, 0) //Freq is 440 Hz by default. It is calculated in Hz, so in case of using, for instance, a MIDI value, we need to convert it using the method .midicps. The second argument is the phase, which is measured in radians (0 = center, 0.5pi = 90º = top, 1pi = 180º = center, half period, 1.5pi = 270º = bottom, 2pi = 360º = back to center, and everything in between). The phase is normally only significant when using the signal as an LFO. The third and fourth arguments are the mul (1 by default), a value multiplied by the amplitude of the signal, which affects how narrow or wide is the soundwave in the "y" axis; and the add (0 by default), a value that is added to the output, affects the position of the soundwave in the "y" axis. Normally, when using the signal to produce sound, the mul value should be somewher between 0 and 1 (although 1 is, in normal conditions, the limit of the saturation), and the add value will be 0 (as no DC offset, related to the mean amplitude value, is desirable).
 
+//Some more demonstration on the concept of phase and phase inversion (LFSaw will be studied later, but it is just a sawtooth oscillator):
+{ LFSaw.ar(40, 0, [1, -1]) }.plot(0.1) //Inverting the phase means multiplying every samply by -1. Here, one sawtooth wave is inverted and the other one is not, which would bring about phase cancellation.
+{ LFSaw.ar(40, 0, [1, -1]).sum }.plot(0.1) //If both signals are added, there is nothing left in the graph, and they wouldn't produce any sound.
+
 //Using keyword assignment: any arguments in any order:
 SinOsc.ar(mul: 0.1, freq: 330)
 
@@ -734,7 +738,8 @@ add = mul + low limit (in our example, = 660).
 (
 {
 	[
-		SinOsc.ar(440, 0, 1, 0).unipolar, //Sine wave turned into a unipolar signal.
+		//SinOsc.ar(440, 0, 1, 0).unipolar, //Sine wave turned into a unipolar signal.
+		SinOsc.ar(440) * 0.5 + 0.5, //This calculation is equivalent to the method .unipolar (and equal to writing mul = 0.5 and add = 0.5 within the signal).
 		LFPulse.ar(440, 0, 0.5, 1, 0).bipolar //Pulse wave turned into a bipolar signal.
 	]
 }.plot(5/440, minval: -3, maxval: 3)
