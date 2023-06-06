@@ -137,6 +137,18 @@ r = Routine({
 )
 r.next
 
+//The method "loop" is equivalent to inf.do:
+(
+r = Routine({
+	var options;
+
+	options = [\green, \black, \white];
+
+	loop({ options.choose.yield }) //Alternative use of the method "loop".
+})
+)
+r.next
+
 //USING CLOCKS
 //In order to automatize the Routine instead of using the method .next repeatedly, we need to make the Routine depend on a clock. This is done by sending to the Routine the method .play. When a Routine received the method .play, it is control by a clock. The number assigned to .yield will represent the time between each iteration of the Rotuine.
 //As the topic of clocks in SC is quite heavy and I will just touch the surface, the following link might be useful to deepen in thiss: https://depts.washington.edu/dxscdoc/Help/Tutorials/Getting-Started/14-Scheduling-Events.html
@@ -152,6 +164,16 @@ r = Routine({
 })
 )
 r.play
+
+//The controls of Routines with clocks can also be carried out by the method .fork (equivalent to the previous code). According to the Help file, "fork returns a Routine using the receiver as it's function, and plays it in a TempoClock" (this is to be understood later on). As with "play" (when applied to a stream), it also receives the arguments "clock" and "quant":
+(
+{
+	inf.do({
+		[\paper, \scissors, \rock].choose.postln;
+		1.yield
+	})
+}.fork
+)
 
 //Understanding clocks in SC:
 r.clock //The clock of "r" is "a TempoClock" (the clock by default in SC, measured in beats according to a specific tempo, 60 bpm by default). Other clocks in SuperCollider are SystemClock and AppClock. SystemClock always runs in seconds, so for musical events, it is less flexible than TempoClock. SC resorts to AppClock for lower system priority processes (everything that is not related to sound synthesis, such as graphical interfaces and other non-time-critical tasks. TempoClock is the most flexible for musical events as its unit can depend on different tempos (not just seconds).
