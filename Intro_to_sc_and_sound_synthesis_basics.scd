@@ -48,6 +48,7 @@ Because of client and server are two different and independent programs, the aud
 - The semicolon ";" is used to separate each instruction to be interpreted by SC. This might be the reason for the majority of the syntax error at the beginning.
 - Comments are written using "//" for single lines and "/*...*/ for blocks of code (such as the one these recommendations are being written into).
 - It is possible to record the output of the audio server at any moment: click the status bar bellow and select "Start recording". The recording can be concluded by pressing "Pause recording" or ctrl + period.  The recordings will be saved in AIFF format by default, in a folder called "Recordings" somewhere in the SuperCollider folder in your computer.
+- In the View menu, the "Split to right" option allows you to open two SC files on a split screen.
 */
 
 //########################################################
@@ -118,6 +119,11 @@ inf //Keyword for "infinity".
 2ss //Double sharp.
 2bb //Double flat.
 
+//Any literal can be represented also by its class (more on classes later on), just to demonstrate that literals are just direct representations of certain objects. For example, an integer or a float. We can inspect these classes by looking at their implementations (ctrl+i). 2 + 2 = 5 could be doable in SuperCollider by modifying the addition method of Integer (but better not to touch it):
+Integer
+Float
+SimpleNumber
+
 //Strings: strings are sequences of characters between double quotes:
 "string"
 "string".scramble //We can apply methods to strings, such as scramble or size.
@@ -168,7 +174,7 @@ HPF
 
 
 //MATHEMATICAL OPERATIONS
-//Unary operations are applied to single numbers (normally, using methods); binary operations are performed between two or more numbers (can be also applied through methods).s
+//Unary operations are applied to single numbers (normally, using methods); binary operations are performed between two or more numbers (can be also applied through methods).
 //Here is a list of common unary and binary operators in SC: https://doc.sccode.org/Overviews/Operators.html.
 
 //Basic calculations:
@@ -431,7 +437,7 @@ z = Array.series(12, 0, 1) //Creating an array assigned to a global variable.
 z.reverse //Retrograded series.
 z = z.reverse //Reassigned to the variable.
 z.scramble //Random change or order of the elements.
-z = z.scramble.keep(5) //Reassigning a scrambled series and keeping only the first 5 elements.
+z = z.scramble.keep(5) //Reassigning a scrambled series and keeping only the first 5 elements. When receiving a negative value, keeps the -n last elements.
 z.sort //Values in upward order.
 z.sort.reverse //Values in downward order.
 z.mirror //Original and retrograded series put together.
@@ -453,18 +459,28 @@ Array.series(200, 0, 1).lastIndex //Shows the index of the last element (in this
 h = [0, 1, 2, 3].rotate(1) //Rotate elements one space to the right, assigned to variable "h".
 h = h.rotate(-2) //Rotate elements two spaces to the left successively.
 [1, 2, 3, 4, 5].sum //Addition of the elements of an homogeneous array. Could be used to sum an array of signals into one channel (beware the amplitude).
+[3, 4, 1, 1].integrate //Returns a collection with the incremental sums of all elements.
+[3, 4, 1, 1].differentiate //Returns a collection with the pairwise difference between all elements (so 3-1, 4-3, 1-4 and 1-1, the first one is wrapped).
+[3, 4, 1, 1].neg //Many unary operator methods can be applied to an array and will be applied to each of its elements (.neg, .reciprocal, .abs, .asFloat, .asInteger, .floor, .squared, .cubed, .sqrt, .midicps, .midiratio, .dbamp, .log, .sin, .cos, .tanh, .distort, .even, .odd, .isPositive, .isNegative, .magnitude,
+//See other mathematical methods and functions in the Help file of SequenciableCollection.
 
 //Arithmetic operations between arrays of different sizes:
 [1, 2, 3, 4, 5] + [1, 2, 3] //Next line is equal to this one:
 [1, 2, 3, 4, 5] + [1, 2, 3, 1, 2]
 
 a = [0, 1, 2, 3, 4]
+a.first //Simply asking for the first element of the collection.
+a.last //Returns the last element of the collection.
 a = a.add(1000) //Adding a new element at the end of the collection and reassigning the variable.
 a[1] = 2000 //Method "put", replaces a new element in the indicated index, removing the previous one.
-a.put(1, 2000) //Another option for the method .put (arguments are the index and the new element).
+a.put(1, 2000) //Another option for the method .put (arguments are the index and the new element). There is also .putFirst and .putLast.
+a.indexOf(2000) //Returns the index of the indicated element (lots of other methods to specify this further).
 b = a.removeAt(1) //Removes the element at the indicated index. Now assigned to "b".
 b //"b" contains 2000.
 a //"a" does not contain 2000 anymore.
+y = [7, 8, 7, 6, 5, 6, 7, 6, 7, 8, 9]
+y.findAll([7, 6]) //Returns an array with all the indexes at which the specific sequency is found.
+y = y.swap(1, 2) //Swaps the elements in the indicated indexes and return the new collection.
 
 //Concatenation of arrays:
 k = [1, 2, 3]
@@ -1481,6 +1497,23 @@ Env.linen(0.01, 1, 0.3, 1, \linear).plot //Includes an attack, sustain and relea
 //Nice "punchy" bass XD (only for good loudspeakers): a very sharp envelope is applied to the frequency, and a percussive envelope is applied to the amplitude:
 { SinOsc.ar(EnvGen.ar(Env([400, 40], 0.05)), 0, EnvGen.ar(Env.perc(0, 4))).dup(2) * 0.5 }.play
 
+//Some other Env instance methods (alreadu studied .circle and .plot):
+e = Env([0, 0.5, 0.1, 0.5, 0], [1, 4, 6, 2], \linear)
+e.duration //Returns the total duration of the envelope.
+e.duration = 15 //Sets a new total duration of the times array by stretching them.
+
+a = Env.adsr; //This kind of Env will be studied later (sustained envelope), but used here as an example.
+a.levels; //Shows the current levels of the Env in "a".
+a.range(42, 45).levels; //Returns a copy of the Env whose levels have been mapped onto the given linear, exponential or curve range.
+a.exprange(42, 45).levels;
+a.curverange(42, 45, -4).levels;
+(
+// Mapping an Env to an exponential frequency range (possible use of the previous methods):
+{
+    SinOsc.ar(EnvGen.ar(Env.perc(0.01, 0.7).exprange(80, 10000), doneAction: Done.freeSelf)) * 0.2;
+}.play
+)
+
 
 //TRIGGER
 //The second argument of EnvGen is "gate". Gate is 1 by default as, as far as it is 1, it will trigger the envelope and hold it open. Though in order to use the argument gate as a real gate we need a different kind of envelope that can be sustained. Gate can be used as a trigger for those envelopes that cannot be sustained in order to "reboot" the envelope every certain amount of time (this is equivalent to the method .circle, but now we don't depend on the duration of the envelope, but on the frequency of the trigger, which we can control independently of the duration of the envelope):
@@ -1502,7 +1535,7 @@ Env.linen(0.01, 1, 0.3, 1, \linear).plot //Includes an attack, sustain and relea
 	trigger = Impulse.ar(1/4); //It does not matter if the envelope is completed: every four seconds, it is rebooted (if longer than 4 seconds, it is cut, and if shorter than 4 seconds, last value is sustained until next trigger).
 	time = [rrand(0.5, 3)]; //Random time chosen between 0.5 and 3 seconds. If the random choice was made directly into the expanded envelope, each envelope will feature a different time value. This will also happens if the rrand is sent within a function (between curly brackets), as several instances of the function will be executed (instead of duplicating an array).
 
-	//Array of five envelopes (each envelope features five random levels used as frequencies in the SinOsc), bringing about five sine oscillators:
+	//Array of five envelopes (each envelope features five random levels used as frequencies in the SinOsc), bringing about five sine oscillators. A further note about Env multichannel expansion: in here we are directly creating an array of EnvGen, but another option is to simply assign an array to one of the values in any argument of Env, as the Help file explains: "If one of the values within either levels, times, or curves is itself an array, the envelope expands to multiple channels wherever appropriate. This means that when such an envelope is passed to an EnvGen, this EnvGen will expand":
 	freq = Array.fill(5, {
 		EnvGen.ar(Env(Array.fill(5, { exprand(60, 78).midicps }), time, \step), trigger) //Because of the step curve, we only hear four frequencies.
 	});
@@ -1553,12 +1586,13 @@ a = { |gate = 1| //Default value (envelope is immediately triggered by default w
 	env = EnvGen.ar(Env.adsr(0.1, 0.2, 0.5, 1, 0.2, -4), gate);
 
 	SinOsc.ar !2 * env
-}.scope
+}.plays
 )
 
 //We can use the method .set to change the arguments of a signal running in the server (the arguments are called through symbols):
 a.set(\gate, 0) //Gate = 0 triggers the release of the envelope.
 a.set(\gate, 1) //Gate = 1 triggers a new attack, decay and sustain of the envelope.
+a.set(\gate, -1) //Gate = -1 cuts the envelope (if opened) with no release time (produces a click).
 //Meanwhile, the envelope continues running in the server even when there is no sound (see node tree). The synth is the same, gate = 1 does not produce a new instance of the envelope, it just retriggers the one already running in the server.
 
 //DoneAction = 2 (last argument of EnvGen): see Help file of "EnvGen" --> In the information about the argument "doneAction", open the documentation about "Done": at the end of the document, there is a list of actions that can be implemented with doneAction: doneAction = 0 means "do nothing when the UGen is finished", doneAction = 2 means "free the enclosing synth" (so that the synth stops running in the server). In the same document, there is a list of the classes concerned with the doneAction argument:
@@ -1597,6 +1631,32 @@ a.set(\gate, 1) //Sending 1 to the gate again is no longer possible because the 
 { LPF.ar(LFSaw.ar(40), XLine.ar(600, 40, 2)).dup(2) * 0.1 }.play //Example: nice bass beat, but the sound does not go at the end (Line sustains the last value, just like any other envelope).
 { LPF.ar(LFSaw.ar(40), XLine.ar(600, 40, 2, doneAction: 2)).dup(2) * 0.1 }.play //Now the signal is gone after the line, but causing a click.
 { LPF.ar(LFSaw.ar(40), XLine.ar(600, 40, 2, doneAction: 0)).dup(2) * Line.ar(0.2, 0, 2, doneAction: 2) }.play //Another line is applied to the amplitude and doneAction is applied to the amplitude envelope to cut the filter properly with no clicks.
+
+//#####################################################
+//Advance example (for SynthDefs):
+//The Env class method .newClear creates an "empty" envelope with a specific number of segments and channels, so that it can be filled in later:
+Env.newClear(numSegments: 8, numChannels: 1) //Arguments.
+
+//According to the Env Help file, "this can be useful when passing Env parameters as args to a Synth. Note that the maximum number of segments is fixed and cannot be changed once embedded in a SynthDef" (once the SynthDef is compiled). Example from Help file:
+(
+SynthDef(\help_Env_newClear, {
+	|out = 0, gate = 1|
+    var env, envctl;
+
+    //Empty 4-segment envelope:
+    env = Env.newClear(4);
+
+	//Control argument array (see .kr as an instance method of Env in the Help file):
+    envctl = \env.kr(env.asArray); //.asArray converts the Env to an Array in a specially ordered format. This allows for Env parameters to be settable arguments in a SynthDef.
+
+    Out.ar(out, SinOsc.ar(EnvGen.kr(envctl, gate), 0) * -12.dbamp);
+}).add;
+)
+
+Synth(\help_Env_newClear, [\env, Env([700, 900, 900, 800], [1, 1, 1], \exp)]);
+
+Synth(\help_Env_newClear, [\env, Env({ rrand(60, 70).midicps } !4, [1, 1, 1], \exp)]); //Random levels.​
+//#####################################################
 
 /////////////////////////////////////////////////////////////////////////////////
 
